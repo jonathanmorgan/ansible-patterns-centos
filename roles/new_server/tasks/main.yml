@@ -1,0 +1,248 @@
+---
+# This playbook contains common plays that will be run on all nodes.
+
+# set hostname
+
+# in /etc/hostname
+- name: Put desired host name in /etc/hostname ( {{ server_host_name }} )
+  become: yes
+  become_user: root
+  template:
+    src: etc_hostname.j2
+    dest: /etc/hostname
+
+# add to end of 127.0.0.1 line in /etc/hosts
+- name: Add host name ( {{ server_host_name }} ) to /etc/hosts.
+  become: yes
+  become_user: root
+  lineinfile:
+    dest: /etc/hosts
+    backrefs: yes
+    regexp: '^(127\.0\.0\.1(?!.*\b{{ server_host_name }}\b).*)'
+    line: '\1\t{{ server_host_name }}'
+
+# ==> SSH sanity check.
+
+# update apt cache
+- name: Update apt cache
+  become: yes
+  become_user: root
+  apt:
+    update_cache: yes
+
+# make sure that OpenSSH is installed
+- name: install OpenSSH
+  become: yes
+  become_user: root
+  apt:
+    name:
+      - openssh-client
+      - openssh-server
+      - openssh-sftp-server
+    state: present
+
+# ==> ufw
+
+# enable firewall
+- name: Allow SSH port
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    port: ssh
+  notify: enable ufw
+
+# ==> dkms
+
+# make sure that dkms is installed
+- name: install dkms
+  become: yes
+  become_user: root
+  apt:
+    name:
+      - dkms
+    state: present
+
+# ==> apt - get latest packages
+
+# update cache
+- name: Update apt cache
+  become: yes
+  become_user: root
+  apt:
+    update_cache: yes
+
+# upgrade
+- name: Upgrade installed packages
+  become: yes
+  become_user: root
+  apt:
+    upgrade: dist
+
+# Install first set of needed packages
+- name: install lots of packages
+  become: yes
+  become_user: root
+  apt:
+    name:
+      - screen
+      - vim
+      - git
+      - linux-image-generic
+      - linux-headers-generic
+      - python
+      - python3
+      - subversion
+      - links
+      - lynx
+      - fdutils
+      - linux-tools-generic
+      - build-essential
+      - libssl-dev
+      - python-dev
+      - python3-dev
+      - liblapack-dev
+      - libatlas-base-dev
+      - gfortran
+      - pkg-config
+      - zlib1g-dev
+      - libpng-dev
+      - libfreetype6-dev
+      - libxml2-dev
+      - libffi-dev
+      - acl
+      - reptyr
+      - mosh
+      - dpkg-sig
+      - net-tools
+    state: present
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60000 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60000
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60001 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60001
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60002 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60002
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60003 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60003
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60004 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60004
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60005 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60005
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60006 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60006
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60007 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60007
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60008 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60008
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60009 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60009
+    proto: udp
+  notify: enable ufw
+
+# ufw - Allow UDP 60000-60010 for mosh
+- name: Allow UDP 60010 for mosh
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    to_port: 60010
+    proto: udp
+  notify: enable ufw
+
+# in ~ of ansible user: .vimrc for syntax highlighting, tabs as spaces instead of tabs.
+- name: Put .vimrc in place
+  template:
+    src: template.vimrc.j2
+    dest: '/home/{{ ansible_user }}/.vimrc'
+
+# create Downloads folder in ansible_user home if one not already present.
+- name: make sure there is a Downloads folder in ansible_user
+  file:
+    path: ~/Downloads
+    state: directory
+
+# create /mnt/cdrom folder.
+- name: make sure there is a Downloads folder in ansible_user
+  become: yes
+  become_user: root
+  file:
+    path: /media/cdrom
+    state: directory

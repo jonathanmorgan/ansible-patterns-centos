@@ -1,0 +1,77 @@
+---
+# These tasks install and configure apache2 and mod_wsgi for python 3.
+
+# Install apache2 and mod_wsgi for Python 3
+- name: Install OS packages for apache2 and mod_wsgi for Python 3
+  become: yes
+  become_user: root
+  apt:
+    name:
+      - apache2
+      - libapache2-mod-wsgi-py3
+
+# Enable mod_wsgi
+- name: Enable mod_wsgi module.
+  become: yes
+  become_user: root
+  apache2_module:
+    state: present
+    name: wsgi
+  notify: restart apache2
+
+# open firewall for http
+- name: Allow HTTP ports
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    port: http
+
+# ==> HTTPS
+# from: https://www.evernote.com/l/AGUb2u876oVNyozlxLmrJ6c5qWjvn062el4
+
+# Enable ssl
+- name: Enable ssl module.
+  become: yes
+  become_user: root
+  apache2_module:
+    state: present
+    name: ssl
+  notify: restart apache2
+
+# update the SSL site configuration if cert and key paths are specified.
+- name: update the SSL site configuration if cert and key paths are specified.
+  become: yes
+  become_user: root
+  template:
+    src: 000-default-le-ssl.conf.j2
+    dest: /etc/apache2/sites-available/{{ apache_server_ssl_site_config }}.conf
+  notify: restart apache2
+  when: server_ssl_certificate_path != "" and server_ssl_private_key_path != "" and apache_server_ssl_site_config != ""
+
+# enable SSL site configuration
+- name: call a2ensite to enable {{ apache_server_ssl_site_config }} site
+  become: yes
+  become_user: root
+  shell: a2ensite {{ apache_server_ssl_site_config }}
+  notify: restart apache2
+  when: ( apache_server_ssl_site_config is defined ) and ( apache_server_ssl_site_config != "" )
+
+# update the 000-default.conf site file to redirect all traffic to HTTPS.
+- name: update the 000-default.conf site file to redirect all traffic to HTTPS.
+  become: yes
+  become_user: root
+  template:
+    src: 000-default.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+  notify: restart apache2
+  when: ( apache_server_ssl_site_config is defined ) and ( apache_server_ssl_site_config != "" )
+
+# open firewall for https
+- name: Allow HTTPS port
+  become: yes
+  become_user: root
+  ufw:
+    rule: allow
+    port: https
+  when: ( apache_server_ssl_site_config is defined ) and ( apache_server_ssl_site_config != "" )

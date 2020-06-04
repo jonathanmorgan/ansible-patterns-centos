@@ -1,0 +1,282 @@
+---
+
+# clone the required git repos
+
+# ==> prerequisite: python_utilities
+# - https://github.com/jonathanmorgan/python_utilities.git
+# - git@github.com:jonathanmorgan/python_utilities.git
+- name: clone python_utilities
+  git:
+    repo: https://github.com/jonathanmorgan/python_utilities.git
+    dest: "{{ django_project_folder_path }}/python_utilities"
+
+# install python_utilities requirements
+- name: install python_utilities requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/python_utilities/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# install python_utilities potgresql-specific requirements
+- name: install python_utilities potgresql-specific requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/python_utilities/requirements_pgsql.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> prerequisite: django_config
+# - https://github.com/jonathanmorgan/django_config.git
+# - git@github.com:jonathanmorgan/django_config.git
+- name: clone django_config
+  git:
+    repo: https://github.com/jonathanmorgan/django_config.git
+    dest: "{{ django_project_folder_path }}/django_config"
+
+# add to INSTALLED_APPS 
+- name: add django_config to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'django_config.apps.Django_ConfigConfig' )
+  notify: touch wsgi.py
+
+# install django_config requirements
+- name: install django_config requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/django_config/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> prerequisite: django_messages
+# - https://github.com/jonathanmorgan/django_messages.git
+# - git@github.com:jonathanmorgan/django_messages.git
+- name: clone django_messages
+  git:
+    repo: https://github.com/jonathanmorgan/django_messages.git
+    dest: "{{ django_project_folder_path }}/django_messages"
+
+# add to INSTALLED_APPS 
+- name: add django_messages to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'django_messages.apps.DjangoMessagesConfig' )
+  notify: touch wsgi.py
+
+# install django_messages requirements
+- name: install django_messages requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/django_messages/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> context
+# - https://github.com/jonathanmorgan/context.git
+# - git@github.com:jonathanmorgan/context.git
+- name: clone context
+  git:
+    repo: https://github.com/jonathanmorgan/context.git
+    dest: "{{ django_project_folder_path }}/context"
+
+# add to INSTALLED_APPS 
+- name: add context to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'context.apps.ContextConfig' )
+  notify: touch wsgi.py
+
+# add django_json_widget to INSTALLED_APPS 
+- name: add django_json_widget to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'django_json_widget' )
+  notify: touch wsgi.py
+
+# add to urls.py 
+- name: add context to urls.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/urls.py'
+    line: urlpatterns.append( path( 'context/', include( 'context.urls' ) ) )
+  notify: touch wsgi.py
+
+# install django_config requirements
+- name: install context requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/context/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> context_text
+# - https://github.com/jonathanmorgan/context_text.git
+# - git@github.com:jonathanmorgan/context_text.git
+- name: clone context_text
+  git:
+    repo: https://github.com/jonathanmorgan/context_text.git
+    dest: "{{ django_project_folder_path }}/context_text"
+
+# add to INSTALLED_APPS 
+- name: add context_text to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'context_text.apps.Context_TextConfig' )
+  notify: touch wsgi.py
+
+# add to urls.py 
+- name: add context_text to urls.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/urls.py'
+    line: urlpatterns.append( path( 'context/text/', include( 'context_text.urls' ) ) )
+  notify: touch wsgi.py
+
+# install context_text requirements
+- name: install context_text requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/context_text/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> context_analysis
+# - https://github.com/jonathanmorgan/context_analysis.git
+# - git@github.com:jonathanmorgan/context_analysis.git
+- name: clone context_analysis
+  git:
+    repo: https://github.com/jonathanmorgan/context_analysis.git
+    dest: "{{ django_project_folder_path }}/context_analysis"
+
+# add to INSTALLED_APPS 
+- name: add context_analysis to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'context_analysis.apps.Context_AnalysisConfig' )
+  notify: touch wsgi.py
+
+# add to urls.py 
+- name: add context_analysis to urls.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/urls.py'
+    line: urlpatterns.append( path( 'context/analysis/', include( 'context_analysis.urls' ) ) )
+  notify: touch wsgi.py
+
+# install context_analysis requirements
+- name: install context_analysis requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/context_analysis/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> context_data
+# - https://github.com/jonathanmorgan/context_data.git
+# - git@github.com:jonathanmorgan/context_data.git
+- name: clone context_data
+  git:
+    repo: https://github.com/jonathanmorgan/context_data.git
+    dest: "{{ django_project_folder_path }}/context_data"
+
+# add to INSTALLED_APPS 
+- name: add context_data to INSTALLED_APPS in settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: INSTALLED_APPS.append( 'context_data.apps.ContextDataConfig' )
+  notify: touch wsgi.py
+
+# add to urls.py 
+- name: add context_data to urls.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/urls.py'
+    line: urlpatterns.append( path( 'context/data/', include( 'context_data.urls' ) ) )
+  notify: touch wsgi.py
+
+# install context_data requirements
+- name: install context_data requirements
+  pip:
+    requirements: "{{ django_project_folder_path }}/context_data/requirements.txt"
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# ==> phd_work
+# create work folder "{{ django_project_folder_path }}/work"
+- name: make sure there is a "{{ django_project_folder_path }}/work" folder
+  file:
+    path: "{{ django_project_folder_path }}/work"
+    state: directory
+
+# clone git repo.
+# - https://github.com/jonathanmorgan/phd_work.git
+# - git@github.com:jonathanmorgan/phd_work.git
+- name: clone phd_work
+  git:
+    repo: https://github.com/jonathanmorgan/phd_work.git
+    dest: "{{ django_project_folder_path }}/work/phd_work"
+  when: ( include_phd_work is defined ) and ( include_phd_work|bool == True )
+
+# ==> remove requirements we have source for: django-basic-config, django-basic-messages, python-utilities-jsm
+- name: uninstall requirements django-basic-config, django-basic-messages, python-utilities-jsm (we have source for them)
+  pip:
+    virtualenv: "{{ django_virtualenv_path }}"
+    state: absent
+    name:
+      - django-basic-config
+      - django-basic-messages
+      - python-utilities-jsm
+  notify: touch wsgi.py
+
+# ==> update the database
+- name: run `python manage.py migrate`
+  django_manage:
+    app_path: "{{ django_project_folder_path }}"
+    command: migrate
+    virtualenv: "{{ django_virtualenv_path }}"
+  notify: touch wsgi.py
+
+# collect static
+- name: run `python manage.py collectstatic`
+  django_manage:
+    app_path: "{{ django_project_folder_path }}"
+    command: collectstatic --noinput
+    virtualenv: "{{ django_virtualenv_path }}"
+
+# ==> update settings to include login variables
+
+# add leading comment
+- name: add sourcenet leading comment to settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: '# login configuration'
+  notify: touch wsgi.py
+
+# add LOGIN_URL
+- name: add LOGIN_URL to settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: "LOGIN_URL = '/{{ django_project_name }}/context/accounts/login/'"
+  notify: touch wsgi.py
+
+# add LOGIN_REDIRECT_URL
+- name: add LOGIN_REDIRECT_URL to settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: "LOGIN_REDIRECT_URL = '/{{ django_project_name }}/context/index'"
+  notify: touch wsgi.py
+
+# add LOGOUT_URL
+- name: add LOGOUT_URL to settings.py
+  lineinfile:
+    path: '{{ django_config_folder_path }}/settings.py'
+    line: "LOGOUT_URL = '/'"
+  notify: touch wsgi.py
+
+# should end up touch-ing wsgi.py to reload everything.
+
+# new index.html
+- name: add index.html to webroot
+  become: yes
+  become_user: root
+  template:
+    src: index.html.j2
+    dest: '/var/www/html/index.html'
+
+# also add python_resources.html
+- name: add python_resources.html to webroot
+  become: yes
+  become_user: root
+  template:
+    src: python_resources.html.j2
+    dest: '/var/www/html/python_resources.html'
