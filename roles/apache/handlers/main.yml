@@ -7,5 +7,5 @@
   become: yes
   become_user: root
   service:
-    name: apache2
+    name: httpd
     state: restarted

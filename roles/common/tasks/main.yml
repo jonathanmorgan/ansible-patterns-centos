@@ -1,46 +1,26 @@
 ---
 # This playbook contains common plays that will be run on all nodes.
 
+- name: Ensure EPEL repository is enabled 
+  become: yes
+  become_user: root
+  dnf: 
+    name: epel-release 
+    state: present
+    update_cache: yes
+  notify: yum-clean-metadata
+
 # Install first set of needed packages
 - name: install lots of packages
   become: yes
   become_user: root
-  apt:
+  dnf:
     name:
       - screen
       - vim
       - git
-      - linux-image-generic
-      - linux-headers-generic
-      - python
-      - python3
-      - subversion
-      - links
-      - lynx
-      - fdutils
-      - linux-tools-generic
-      - build-essential
-      - libssl-dev
-      - python-dev
-      - python3-dev
-      - liblapack-dev
-      - libatlas-base-dev
-      - gfortran
-      - pkg-config
-      - zlib1g-dev
-      - libpng-dev
-      - libfreetype6-dev
-      - libxml2-dev
-      - libffi-dev
-      - libxml2
-      - libxslt1-dev
-      - libyaml-dev
-      - curl
-      - expect
-      - libcairo2-dev
-      - libgirepository1.0-dev
-      - uchardet
-      - aptitude
+      - sqlite
+      - sqlite-devel
     state: present
 
 # create work folder "{{ work_folder }}"
@@ -64,14 +44,6 @@
     url: https://bootstrap.pypa.io/get-pip.py
     dest: ~/Downloads/get-pip.py
 
-# install pip in python 2
-- name: Install pip in python 2
-  become: yes
-  become_user: root
-  shell: python get-pip.py
-  args:
-    chdir: /home/{{ansible_user}}/Downloads
-
 # install pip in python 3
 - name: Install pip in python 3
   become: yes
@@ -85,7 +57,7 @@
   become: yes
   become_user: root
   pip:
-    executable: pip3
+    executable: /usr/local/bin/pip3
     name:
       - virtualenv
       - virtualenvwrapper
@@ -141,36 +113,3 @@
   lineinfile:
     path: '~/.bashrc'
     line: 'source /usr/local/bin/virtualenvwrapper.sh'
-
-# uncomment any commented deb-src lines in /etc/apt/sources.list
-- name: uncomment any commented deb-src lines in /etc/apt/sources.list
-  become: yes
-  become_user: root
-  replace:
-    path: /etc/apt/sources.list
-    regexp: '# deb-src'
-    replace: 'deb-src'
-
-# uncomment any commented deb lines in /etc/apt/sources.list
-- name: uncomment any commented deb lines in /etc/apt/sources.list
-  become: yes
-  become_user: root
-  replace:
-    path: /etc/apt/sources.list
-    regexp: '# deb'
-    replace: 'deb'
-
-# update apt cache
-- name: Update apt cache
-  become: yes
-  become_user: root
-  apt:
-    update_cache: yes
-
-# install build dependencies for pillow python package
-- name: install pillow build dependencies
-  become: yes
-  become_user: root
-  apt:
-    name: pillow
-    state: build-dep

@@ -7,8 +7,9 @@
   become_user: root
   apt:
     name:
-      - apache2
-      - libapache2-mod-wsgi-py3
+      - httpd
+      - httpd-devel
+      - mod-wsgi
 
 # Enable mod_wsgi
 - name: Enable mod_wsgi module.

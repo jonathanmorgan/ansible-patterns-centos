@@ -2,10 +2,10 @@
 # Handler to handle common notifications. Handlers are called by other plays.
 # See http://docs.ansible.com/playbooks_intro.html for more information about handlers.
 
-- name: reset ufw
-  ufw:
-    state: reset
-    
-- name: enable ufw
-  ufw:
-    state: enabled
+# Handler showing how to clean dnf metadata cache
+- name: dnf-clean-metadata
+  become: yes
+  become_user: root
+  command: dnf clean metadata
+  args:
+    warn: no
