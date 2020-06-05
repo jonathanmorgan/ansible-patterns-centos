@@ -5,8 +5,12 @@
   become: yes
   become_user: root
   service:
-    name: mysql
+    name: mysqld
     state: restarted
-#
-#- name: restart iptables
-#  service: name=iptables state=restarted
+
+# reload firewall
+
+- name: reload firewall
+  become: yes
+  become_user: root
+  shell: firewall-cmd --reload

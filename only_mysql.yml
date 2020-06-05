@@ -1,0 +1,7 @@
+---
+# This playbook deploys mysql server.
+
+- name: deploy mysql
+  hosts: mysql_servers
+  roles:
+    - mysql

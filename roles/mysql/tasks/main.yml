@@ -1,29 +1,17 @@
 ---
 # This playbook will install and configure MySQL.
 
-# Install MariaDB?
-- name: Install MariaDB packages
-  become: yes
-  become_user: root
-  apt:
-    name:
-      - mariadb-server
-      - mariadb-client
-      - libmariadbd-dev
-      - libmariadbclient-dev
-  when:
-    - server_mysql_type == "mariadb"
-  tags: mariadb
+# Install MySQL?
 
 - name: Install MySQL packages
   become: yes
   become_user: root
-  apt:
+  dnf:
     name:
       - mysql-server
       - mysql-client
-      - libmysqld-dev
-      - libmysqlclient-dev
+      - libmysqld-devel
+      - libmysqlclient-devel
   when:
     - server_mysql_type == "mysql"
   tags: mysql
@@ -38,18 +26,6 @@
       - mysqlclient
       - PyMySQL
   tags: mysql
-
-# set to listen on defined bind-address - MariaDB
-- name: Set bind-address to {{ server_mariadb_bind_address }} for MariaDB
-  become: yes
-  become_user: root
-  lineinfile:
-    path: '/etc/mysql/mariadb.conf.d/50-server.cnf'
-    line: "bind-address = {{ server_mariadb_bind_address }}"
-  notify: restart mysql
-  when:
-    - server_mysql_type == "mariadb"
-  tags: mariadb
 
 # set to listen on defined bind-address - MySQL
 - name: Set bind-address to {{ server_mysql_bind_address }} for MySQL
@@ -74,15 +50,6 @@
 #  failed_when: false
 #  register: root_pwd_check
 #  tags: mysql
-
-- name: Set MariaDB root password for the first time (root@localhost)
-  become: yes
-  become_user: root
-  shell: mysql -u root --execute="UPDATE mysql.user SET plugin = '', password = PASSWORD( '{{ server_mariadb_root_password }}' ) WHERE user='root';"
-  notify: restart mysql
-  when:
-    - server_mysql_type == "mariadb"
-  tags: mariadb
 
 - name: Set MySQL root password for the first time (root@localhost)
   become: yes
@@ -150,10 +117,10 @@
 - name: Allow mysql/mysql ports
   become: yes
   become_user: root
-  ufw:
-    rule: allow
-    port: mysql
-  notify: restart mysql
+  shell: firewall-cmd --permanent --zone=public --add-service=mysql
+  notify:
+    - reload firewall
+    - restart mysql
   tags: mysql
 
 # create non-root admin user?
