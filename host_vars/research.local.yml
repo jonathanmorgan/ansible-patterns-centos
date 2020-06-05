@@ -26,7 +26,7 @@ server_ssl_certificate_path: ""
 server_ssl_private_key_path: ""
 
 # apache configuration
-apache_server_ssl_site_config: default-ssl
+apache_server_ssl_site_config: ssl
 
 # virtualenvwrapper configuration
 virtualenv_parent_folder: "{{ ansible_user_home_folder }}"

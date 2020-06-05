@@ -1,0 +1,51 @@
+---
+# These tasks install and configure httpd and mod_wsgi for python 3.
+
+# Install httpd and mod_wsgi for Python 3
+- name: Install OS packages for httpd and mod_wsgi for Python 3
+  become: yes
+  become_user: root
+  dnf:
+    name:
+      - httpd
+      - httpd-devel
+      - mod_wsgi
+  notify: restart httpd
+
+# open firewall for http
+- name: Allow HTTP port
+  become: yes
+  become_user: root
+  shell: firewall-cmd --permanent --zone=public --add-service=http
+  notify: reload firewall
+
+# ==> HTTPS
+# from: https://www.evernote.com/l/AGUb2u876oVNyozlxLmrJ6c5qWjvn062el4
+
+# Install mod_ssl
+- name: Install OS packages for openssl and mod_ssl for Python 3
+  become: yes
+  become_user: root
+  dnf:
+    name:
+      - openssl
+      - mod_ssl
+  notify: restart httpd
+
+# update the SSL site configuration if cert and key paths are specified.
+- name: update the SSL site configuration if cert and key paths are specified.
+  become: yes
+  become_user: root
+  template:
+    src: ssl.conf.j2
+    dest: /etc/httpd/conf.d/{{ apache_server_ssl_site_config }}.conf
+  notify: restart httpd
+  when: server_ssl_certificate_path != "" and server_ssl_private_key_path != "" and apache_server_ssl_site_config != ""
+
+# open firewall for https
+- name: Allow HTTPS port
+  become: yes
+  become_user: root
+  shell: firewall-cmd --permanent --zone=public --add-service=https
+  notify: reload firewall
+  when: ( apache_server_ssl_site_config is defined ) and ( apache_server_ssl_site_config != "" )
