@@ -8,10 +8,10 @@
   become_user: root
   dnf:
     name:
+      - mysql
       - mysql-server
-      - mysql-client
-      - libmysqld-devel
-      - libmysqlclient-devel
+      - mysql-devel
+      - apr-devel
   when:
     - server_mysql_type == "mysql"
   tags: mysql
@@ -21,7 +21,7 @@
   become: yes
   become_user: root
   pip:
-    executable: pip3
+    executable: /usr/local/bin/pip3
     name:
       - mysqlclient
       - PyMySQL
@@ -32,24 +32,32 @@
   become: yes
   become_user: root
   lineinfile:
-    path: '/etc/mysql/my.cnf'
+    path: '/etc/my.cnf'
     line: "bind-address = {{ server_mysql_bind_address }}"
   notify: restart mysql
   when:
     - server_mysql_type == "mysql"
   tags: mysql
 
+# start/restart mysql
+- name: restart mysql
+  become: yes
+  become_user: root
+  service:
+    name: mysqld
+    state: restarted
+
 # ==> secure database - equivalent to `mysql_secure_installation` script
 
 # This command will fail when the root password was set previously
 # from: https://github.com/bertvv/ansible-role-mysql/blob/master/tasks/root-password.yml
-#- name: Check if root password is set
-#  shell: >
-#    mysqladmin -u root status
-#  changed_when: false
-#  failed_when: false
-#  register: root_pwd_check
-#  tags: mysql
+- name: Check if root password is set
+  shell: >
+    mysqladmin -u root status
+  changed_when: false
+  failed_when: false
+  register: root_pwd_check
+  tags: mysql
 
 - name: Set MySQL root password for the first time (root@localhost)
   become: yes
@@ -62,11 +70,18 @@
 #    password: "{{ server_mysql_root_password }}"
 #    host: localhost
 #    state: present
-#  when: root_pwd_check.rc == 0
   notify: restart mysql
-  when:
-    - server_mysql_type == "mysql"
+  when: ( server_mysql_type == "mysql" ) and ( root_pwd_check.rc == 0 )
   tags: mysql
+
+# add MySQL configuration file to root user home with password.
+- name: add MySQL configuration file to root user with password.
+  become: yes
+  become_user: root
+  template:
+    src: dot-my.cnf.j2
+    dest: /root/.my.cnf
+  notify: restart mysql
 
 - name: MySQL - set root password - flush privileges
   become: yes
@@ -88,6 +103,7 @@
     - ::1
     - 127.0.0.1
   notify: restart mysql
+  when: ( server_mysql_type == "mysql" ) and ( root_pwd_check.rc == 0 )
   tags: mysql
 
 # Delete anonymous users
