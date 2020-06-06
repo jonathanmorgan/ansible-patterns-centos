@@ -24,7 +24,7 @@
 # ==> package installation
 
 # Make sure EPEL is installed.
-- name: Ensure EPEL repository is enabled 
+- name: Ensure EPEL repository is enabled (dnf)
   become: yes
   become_user: root
   dnf: 
@@ -32,9 +32,20 @@
     state: present
     update_cache: yes
   notify: dnf-clean-metadata
+  when: server_centos_package_manager == "dnf"
+
+- name: Ensure EPEL repository is enabled (yum)
+  become: yes
+  become_user: root
+  yum: 
+    name: epel-release 
+    state: present
+    update_cache: yes
+  notify: dnf-clean-metadata
+  when: server_centos_package_manager == "yum"
 
 # make sure that important packages are installed
-- name: install OpenSSH and dkms
+- name: install OpenSSH and dkms (dnf)
   become: yes
   become_user: root
   dnf:
@@ -43,22 +54,52 @@
       - openssh-server
       - dkms
     state: present
+  when: server_centos_package_manager == "dnf"
+
+- name: install OpenSSH and dkms (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - openssh-clients
+      - openssh-server
+      - dkms
+    state: present
+  when: server_centos_package_manager == "yum"
 
 # upgrade - get latest packages
-- name: Upgrade installed packages
+- name: Upgrade installed packages (dnf)
   become: yes
   become_user: root
   dnf:
     name: "*"
     state: latest
+  when: server_centos_package_manager == "dnf"
+
+- name: Upgrade installed packages (yum)
+  become: yes
+  become_user: root
+  yum:
+    name: "*"
+    state: latest
+  when: server_centos_package_manager == "yum"
 
 # install development tools.
-- name: install the 'Development tools' package group
+- name: install the 'Development tools' package group (dnf)
   become: yes
   become_user: root
   dnf:
     name: '@Development tools'
     state: present
+  when: server_centos_package_manager == "dnf"
+
+- name: install the 'Development tools' package group (yum)
+  become: yes
+  become_user: root
+  yum:
+    name: '@Development tools'
+    state: present
+  when: server_centos_package_manager == "yum"
 
 # in ~ of ansible user: .vimrc for syntax highlighting, tabs as spaces instead of tabs.
 - name: Put .vimrc in place

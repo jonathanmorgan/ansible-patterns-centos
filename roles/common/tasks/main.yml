@@ -1,7 +1,7 @@
 ---
 # This playbook contains common plays that will be run on all nodes.
 
-- name: Ensure EPEL repository is enabled 
+- name: Ensure EPEL repository is enabled (dnf)
   become: yes
   become_user: root
   dnf: 
@@ -9,9 +9,20 @@
     state: present
     update_cache: yes
   notify: yum-clean-metadata
+  when: server_centos_package_manager == "dnf"
+
+- name: Ensure EPEL repository is enabled (yum)
+  become: yes
+  become_user: root
+  yum: 
+    name: epel-release 
+    state: present
+    update_cache: yes
+  notify: yum-clean-metadata
+  when: server_centos_package_manager == "yum"
 
 # Install first set of needed packages
-- name: install lots of packages
+- name: install lots of packages (dnf)
   become: yes
   become_user: root
   dnf:
@@ -27,6 +38,27 @@
       - sqlite-devel
       - vim
     state: present
+  when: server_centos_package_manager == "dnf"
+
+- name: install lots of packages (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - apr-devel
+      - git
+      - openssl
+      - python3
+      - python3-devel
+      - python3-pip
+      - python2-pip
+      - python2-devel
+      - screen
+      - sqlite
+      - sqlite-devel
+      - vim
+    state: present
+  when: server_centos_package_manager == "yum"
 
 # create work folder "{{ work_folder }}"
 - name: make sure there is a "{{ work_folder }}" folder
@@ -53,16 +85,16 @@
 - name: Install pip in python 3
   become: yes
   become_user: root
-  shell: python3 get-pip.py
+  shell: "python3 get-pip.py"
   args:
     chdir: /home/{{ansible_user}}/Downloads
 
 # ==> virtualenv and virtualenvwrapper in python 3.
-- name: install virtualenv and virtualenvwrapper
+- name: install virtualenv and virtualenvwrapper in python 3
   become: yes
   become_user: root
   pip:
-    executable: /usr/local/bin/pip3
+    executable: "{{ python_3_pip_executable }}"
     name:
       - virtualenv
       - virtualenvwrapper

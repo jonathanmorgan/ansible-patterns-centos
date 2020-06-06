@@ -2,53 +2,80 @@
 # This playbook will install and configure mariadb.
 
 # Install MariaDB
-- name: Install MariaDB packages
+- name: Install MariaDB packages (dnf)
   become: yes
   become_user: root
-  apt:
+  dnf:
     name:
+      - mariadb
       - mariadb-server
-      - mariadb-client
-      - libmariadbd-dev
-      - libmariadbclient-dev
+      - mariadb-devel
+      - apr-devel
   tags: mariadb
+  when:
+    - server_centos_package_manager == "dnf"
 
-# enable mysql
-- name: restart mysql
+- name: Install MariaDB packages (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - mariadb
+      - mariadb-server
+      - mariadb-devel
+      - apr-devel
+  tags: mariadb
+  when:
+    - server_centos_package_manager == "yum"
+
+# enable mariadb
+- name: enable mariadb
   become: yes
   become_user: root
   service:
-    name: mysqld
+    name: mariadb
     state: restarted
     enabled: yes
 
-# install python libraries for MySQL in python 3.
-- name: install python libraries for MySQL
+# install python libraries for MySQL in python 2.
+- name: install python 2 libraries for MySQL/mariadb
   become: yes
   become_user: root
   pip:
-    executable: pip3
+    executable: "{{ python_2_pip_executable }}"
+    name:
+      - mysqlclient
+      - PyMySQL
+  tags: mariadb
+  when: ansible_python_interpreter == python_2_path
+
+# install python libraries for MySQL in python 3.
+- name: install python 3 libraries for MySQL/mariadb
+  become: yes
+  become_user: root
+  pip:
+    executable: "{{ python_3_pip_executable }}"
     name:
       - mysqlclient
       - PyMySQL
   tags: mariadb
 
-# set to listen on defined bind-address.
+# set to listen on defined bind-address - MariaDB
 - name: Set bind-address to {{ server_mariadb_bind_address }} for MariaDB
   become: yes
   become_user: root
   lineinfile:
-    path: '/etc/mysql/mariadb.conf.d/50-server.cnf'
+    path: '/etc/my.cnf'
     line: "bind-address = {{ server_mariadb_bind_address }}"
-  notify: restart mysql
+  notify: restart mariadb
   tags: mariadb
 
-# start/restart mysql
-- name: restart mysql
+# start/restart mariadb
+- name: restart mariadb
   become: yes
   become_user: root
   service:
-    name: mysqld
+    name: mariadb
     state: restarted
 
 # ==> secure database - equivalent to `mysql_secure_installation` script
@@ -65,9 +92,9 @@
     disallow_root_login_remotely: true
     remove_test_db: true
   register: mysql_secure
-  notify: restart mysql
+  notify: restart mariadb
 
-  # To see detailed output
+# To see detailed output
 - debug:
     var: mysql_secure
 
@@ -78,7 +105,7 @@
   template:
     src: dot-my.cnf.j2
     dest: /root/.my.cnf
-  notify: restart mysql
+  notify: restart mariadb
 
 # Flush privileges.
 - name: MySQL - flush privileges
@@ -86,27 +113,31 @@
   become_user: root
   shell: mysql -u root --execute="FLUSH PRIVILEGES;"
 #  when: root_pwd_check.rc == 0
-  notify: restart mysql
-  tags: mysql
+  notify: restart mariadb
+  tags: mariadb
 
 # open firewall for MySQL
-- name: Allow mysql/mariadb ports
+- name: Allow mysql/mysql ports
   become: yes
   become_user: root
-  ufw:
-    rule: allow
-    port: mysql
-  notify: restart mysql
+  shell: firewall-cmd --permanent --zone=public --add-service=mysql
+  notify:
+    - reload firewall
+    - restart mariadb
   tags: mariadb
 
 # create non-root admin user?
 
 # check if non-root admin user created.
-- name: check if admin user {{ server_mysql_admin_user }} exists
-  shell: mysql -u root -p{{ server_mysql_root_password }} -e 'SELECT DISTINCT User FROM mysql.user;' | grep {{ server_mysql_admin_user }}
+- name: check if admin user {{ server_mariadb_admin_user }} exists
+  shell: mysql -u root -p{{ server_mariadb_root_password }} -e 'SELECT DISTINCT User FROM mysql.user;' | grep {{ server_mariadb_admin_user }}
   register: admin_exists_check
   failed_when: admin_exists_check.rc == 2
   when: ( server_mariadb_admin_user != "" ) and ( server_mariadb_admin_password != "" )
+
+# To see detailed output
+- debug:
+    var: admin_exists_check
 
 # Creates database user {{ server_mariadb_admin_user }} and password {{ server_mariadb_admin_password }} with all database privileges and 'WITH GRANT OPTION'
 - name: Create non-root admin user {{ server_mariadb_admin_user }}
@@ -128,7 +159,7 @@
   when:
     - server_mariadb_admin_user != ""
     - server_mariadb_admin_password != ""
-    - admin_exists_check.rc == 0
+    - admin_exists_check.rc == 1
     - admin_exists_check.stdout == ""
-  notify: restart mysql
+  notify: restart mariadb
   tags: mariadb

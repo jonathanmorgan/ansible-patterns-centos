@@ -3,7 +3,7 @@
 
 # Install MySQL?
 
-- name: Install MySQL packages
+- name: Install MySQL packages (dnf)
   become: yes
   become_user: root
   dnf:
@@ -13,9 +13,22 @@
       - mysql-devel
       - apr-devel
   when:
-    - server_mysql_type == "mysql"
+    - server_centos_package_manager == "dnf"
   tags: mysql
-
+  
+- name: Install MySQL packages (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - mysql
+      - mysql-server
+      - mysql-devel
+      - apr-devel
+  when:
+    - server_centos_package_manager == "yum"
+  tags: mysql
+  
 # enable mysql
 - name: enable mysql
   become: yes
@@ -30,7 +43,7 @@
   become: yes
   become_user: root
   pip:
-    executable: /usr/local/bin/pip3
+    executable: "{{ python_3_pip_executable }}"
     name:
       - mysqlclient
       - PyMySQL
@@ -44,8 +57,6 @@
     path: '/etc/my.cnf'
     line: "bind-address = {{ server_mysql_bind_address }}"
   notify: restart mysql
-  when:
-    - server_mysql_type == "mysql"
   tags: mysql
 
 # start/restart mysql
@@ -112,6 +123,10 @@
   failed_when: admin_exists_check.rc == 2
   when: ( server_mysql_admin_user != "" ) and ( server_mysql_admin_password != "" )
 
+# To see detailed output
+- debug:
+    var: admin_exists_check
+
 # Creates database user {{ server_mysql_admin_user }} and password {{ server_mysql_admin_password }} with all database privileges and 'WITH GRANT OPTION'
 - name: Create non-root admin user {{ server_mysql_admin_user }}
   become: yes
@@ -132,7 +147,7 @@
   when:
     - server_mysql_admin_user != ""
     - server_mysql_admin_password != ""
-    - admin_exists_check.rc == 0
+    - admin_exists_check.rc == 1
     - admin_exists_check.stdout == ""
   notify: restart mysql
   tags: mysql

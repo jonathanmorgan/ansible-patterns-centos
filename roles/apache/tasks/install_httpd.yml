@@ -2,7 +2,7 @@
 # These tasks install and configure httpd and mod_wsgi for python 3.
 
 # Install httpd and mod_wsgi for Python 3
-- name: Install OS packages for httpd and mod_wsgi for Python 3
+- name: Install OS packages for httpd and mod_wsgi for Python 3 (dnf)
   become: yes
   become_user: root
   dnf:
@@ -11,6 +11,18 @@
       - httpd-devel
       - mod_wsgi
   notify: restart httpd
+  when: server_centos_package_manager == "dnf"
+
+- name: Install OS packages for httpd and mod_wsgi for Python 3 (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - httpd
+      - httpd-devel
+      - mod_wsgi
+  notify: restart httpd
+  when: server_centos_package_manager == "yum"
 
 # open firewall for http
 - name: Allow HTTP port
@@ -32,7 +44,7 @@
 # from: https://www.evernote.com/l/AGUb2u876oVNyozlxLmrJ6c5qWjvn062el4
 
 # Install mod_ssl
-- name: Install OS packages for openssl and mod_ssl for Python 3
+- name: Install OS packages for openssl and mod_ssl for Python 3 (dnf)
   become: yes
   become_user: root
   dnf:
@@ -40,6 +52,17 @@
       - openssl
       - mod_ssl
   notify: restart httpd
+  when: server_centos_package_manager == "dnf"
+
+- name: Install OS packages for openssl and mod_ssl for Python 3 (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - openssl
+      - mod_ssl
+  notify: restart httpd
+  when: server_centos_package_manager == "yum"
 
 # update the SSL site configuration if cert and key paths are specified.
 - name: update the SSL site configuration if cert and key paths are specified.

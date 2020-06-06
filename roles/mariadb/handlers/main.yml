@@ -1,0 +1,16 @@
+---
+# Handler to handle DB tier notifications
+
+- name: restart mariadb
+  become: yes
+  become_user: root
+  service:
+    name: mariadb
+    state: restarted
+
+# reload firewall
+
+- name: reload firewall
+  become: yes
+  become_user: root
+  shell: firewall-cmd --reload
