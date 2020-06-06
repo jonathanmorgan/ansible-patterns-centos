@@ -19,6 +19,15 @@
   shell: firewall-cmd --permanent --zone=public --add-service=http
   notify: reload firewall
 
+# set to start on boot
+- name: enable service httpd
+  become: yes
+  become_user: root
+  systemd:
+    name: httpd
+    enabled: yes
+    masked: no
+
 # ==> HTTPS
 # from: https://www.evernote.com/l/AGUb2u876oVNyozlxLmrJ6c5qWjvn062el4
 
