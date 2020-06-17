@@ -3,6 +3,54 @@
 
 # Install MySQL?
 
+# for CentOS 7, add downloading and verifying RPM. Then, should proceed as normal.
+
+# install MySQL RPM from mysql.org
+- name: install MySQL RPM from mysql.org
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+  when: server_centos_version == "7"
+
+# what version of MySQL?
+
+# mysql 5.7 (57)
+- name: disable mysql 8.0
+  become: yes
+  become_user: root
+  shell: yum-config-manager --disable mysql80-community
+  when:
+    - server_centos_version == "7"
+    - server_mysql_version == "57"
+
+- name: enable mysql 5.7
+  become: yes
+  become_user: root
+  shell: yum-config-manager --enable mysql57-community
+  when:
+    - server_centos_version == "7"
+    - server_mysql_version == "57"
+
+# mysql 8.0 (80)
+- name: disable mysql 5.7
+  become: yes
+  become_user: root
+  shell: yum-config-manager --disable mysql57-community
+  when:
+    - server_centos_version == "7"
+    - server_mysql_version == "80"
+
+- name: enable mysql 8.0
+  become: yes
+  become_user: root
+  shell: yum-config-manager --enable mysql80-community
+  when:
+    - server_centos_version == "7"
+    - server_mysql_version == "80"
+
+# install MySQL packages
 - name: Install MySQL packages (dnf)
   become: yes
   become_user: root
@@ -82,7 +130,7 @@
   register: mysql_secure
   notify: restart mysql
 
-  # To see detailed output
+# To see detailed output
 - debug:
     var: mysql_secure
 
