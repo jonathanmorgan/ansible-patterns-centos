@@ -1,0 +1,21 @@
+# project_name
+project_name:
+project_host_username:
+project_host_url:
+
+# git repos
+do_git: false
+git_user: 
+
+# database
+do_db: false
+db_name:
+db_user_name:
+db_password:
+db_dump_file_name:
+
+# python
+do_python: true
+miniconda_script: Miniconda3-latest-Linux-x86_64.sh
+miniconda_url: https://repo.anaconda.com/miniconda/{{ miniconda_script }}
+miniconda_install_folder: /opt/miniconda3

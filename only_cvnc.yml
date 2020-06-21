@@ -1,0 +1,7 @@
+---
+# This playbook deploys the whole research application stack.
+
+- name: set up CVNC server
+  hosts: cvnc_servers
+  roles:
+    - cvnc
