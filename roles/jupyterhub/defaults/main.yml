@@ -1,0 +1,5 @@
+# python
+python_2_pip_executable: "/usr/bin/pip2"
+python_3_pip_executable: "/usr/local/bin/pip3"
+miniconda3_pip_executable: "/opt/miniconda3/bin/pip3"
+jupyterhub_pip_executable: "{{ miniconda3_pip_executable }}"

@@ -1,0 +1,7 @@
+---
+
+# reload firewall
+- name: reload firewall
+  become: yes
+  become_user: root
+  shell: firewall-cmd --reload

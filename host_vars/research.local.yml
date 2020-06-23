@@ -17,6 +17,7 @@ ansible_become_password: !vault |
 # pip
 python_2_pip_executable: "/usr/bin/pip2"
 python_3_pip_executable: "/usr/local/bin/pip3"
+miniconda3_pip_executable: "/opt/miniconda3/bin/pip3"
 pip_executable: "{{ python_2_pip_executable }}"
 
 # configuration
@@ -84,6 +85,7 @@ r_marutter_version_number: "4.0"
 
 # Jupyterhub configuration
 #jupyterhub_config_folder: /etc/jupyterhub
+#jupyterhub_pip_executable: "{{ miniconda3_pip_executable }}"
 jupyterhub_configproxy_auth_token: 8da752f8de9494b495aaa619bb5c2c8a7a163a0643b91fb57ec0ff9e0392ec85
 jupyterhub_proxy_command_path: ""
 jupyterhub_admin_user_list: "'{{ ansible_user }}'"

@@ -1,33 +1,46 @@
 ---
 # This role will download and install jupyterhub server.
 
-# update apt cache
-- name: Update apt cache
-  become: yes
-  become_user: root
-  apt:
-    update_cache: yes
-
 # install jupyterhub depenencies
 - name: install jupyterhub dependencies
   become: yes
   become_user: root
-  apt:
+  dnf:
     name:
+      - zlib-devel
+      - bzip2-devel
+      - openssl-devel
+      - ncurses-devel
+      - sqlite-devel
+      - readline-devel
+      - tk-devel
+      - gdbm-devel
+      - db4-devel
+      - libpcap-devel
+      - xz-devel
       - npm
-      - nodejs
-      - libzmq3-dev
     state: present
+  when: server_centos_package_manager == "dnf"
 
-# install ubuntu 16.04 jupyterhub depenencies
-- name: install ubuntu 16.04 jupyterhub dependencies
+- name: install jupyterhub dependencies
   become: yes
   become_user: root
-  apt:
+  yum:
     name:
-      - nodejs-legacy
+      - zlib-devel
+      - bzip2-devel
+      - openssl-devel
+      - ncurses-devel
+      - sqlite-devel
+      - readline-devel
+      - tk-devel
+      - gdbm-devel
+      - db4-devel
+      - libpcap-devel
+      - xz-devel
+      - npm
     state: present
-  when: server_ubuntu_version == "16.04"
+  when: server_centos_package_manager == "yum"
 
 # install proxy using npm
 #     sudo npm install -g configurable-http-proxy
@@ -44,7 +57,7 @@
   become: yes
   become_user: root
   pip:
-    executable: pip3
+    executable: "{{ jupyterhub_pip_executable }}"
     name: cython
     state: latest
 
@@ -62,7 +75,7 @@
   become: yes
   become_user: root
   pip:
-    executable: pip3
+    executable: "{{ jupyterhub_pip_executable }}"
     name:
       - jupyterhub
       - ipython[notebook]
