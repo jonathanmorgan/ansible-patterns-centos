@@ -31,7 +31,14 @@
     name: epel-release 
     state: present
     update_cache: yes
-  notify: dnf-clean-metadata
+  when: server_centos_package_manager == "dnf"
+
+- name: dnf-clean-metadata
+  become: yes
+  become_user: root
+  command: dnf clean metadata
+  args:
+    warn: no
   when: server_centos_package_manager == "dnf"
 
 - name: Ensure EPEL repository is enabled (yum)
@@ -41,7 +48,14 @@
     name: epel-release 
     state: present
     update_cache: yes
-  notify: dnf-clean-metadata
+  when: server_centos_package_manager == "yum"
+
+- name: yum-clean-metadata
+  become: yes
+  become_user: root
+  command: yum clean metadata
+  args:
+    warn: no
   when: server_centos_package_manager == "yum"
 
 # make sure that important packages are installed

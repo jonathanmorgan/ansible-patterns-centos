@@ -15,7 +15,7 @@
   stat:
     path: /home/{{ ansible_user }}/Downloads/{{ miniconda_script }}
   register: miniconda_install_file_exists
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # - download latest Miniconda3, 64-bit: https://docs.conda.io/en/latest/miniconda.html
 - name: Download latest Miniconda3
@@ -24,7 +24,7 @@
     dest: /home/{{ ansible_user }}/Downloads/{{ miniconda_script }}
     mode: '0755'
   when:
-    - do_python == true
+    - do_miniconda3 == true
     - miniconda_install_file_exists.stat.exists == false
 
 # does installation folder already exist?
@@ -32,7 +32,7 @@
   stat:
     path: "{{ miniconda_install_folder }}"
   register: miniconda_install_folder_exists
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # - run installer as root, accept license, install to /opt/miniconda3
 - name: run installer as root, accept license, install to {{ miniconda_install_folder }}
@@ -40,7 +40,7 @@
   become_user: root
   shell: bash /home/{{ ansible_user }}/Downloads/{{ miniconda_script }} -b -p {{ miniconda_install_folder }}
   when:
-    - do_python == true
+    - do_miniconda3 == true
     - miniconda_install_folder_exists.stat.exists == false
 
 #------------------------------------------------------------------------------#
@@ -56,7 +56,9 @@
     owner: root
     group: root
     state: link
-  when: do_python == true
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
 
 # sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1 /usr/local/lib
 - name: add link to libpython3.7m.so.1 to /usr/local/lib
@@ -68,7 +70,9 @@
     owner: root
     group: root
     state: link
-  when: do_python == true
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
 
 # sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1.0 /usr/local/lib
 - name: add link to libpython3.7m.so.1.0 to /usr/local/lib
@@ -80,7 +84,9 @@
     owner: root
     group: root
     state: link
-  when: do_python == true
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
 
 # configure ld to find shared Python libs
 - name: configure ld to find shared Python 3 libs.
@@ -89,14 +95,18 @@
   template:
     src: opt-miniconda3.conf.j2
     dest: /etc/ld.so.conf.d/opt-miniconda3.conf
-  when: do_python == true
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
 
 # update the active ld config to reflect changes
 - name: update the active ld config to reflect changes
   become: yes
   become_user: root
   shell: /sbin/ldconfig -v
-  when: do_python == true
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
 
 #------------------------------------------------------------------------------#
 # virtualenv and virtualenvwrapper setup
@@ -108,7 +118,7 @@
   become: yes
   become_user: root
   shell: /opt/miniconda3/bin/conda install -y virtualenv
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # install virtualenvwrapper
 #     sudo /opt/miniconda3/bin/pip install virtualenvwrapper
@@ -120,7 +130,7 @@
     name:
       - virtualenvwrapper
     state: latest
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # add virtualenv configuration to .bashrc
 
@@ -133,7 +143,7 @@
     path: "/home/{{ ansible_user }}/.bashrc"
     regexp: '^(export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3)$'
     replace: '#\1'
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # export WORKON_HOME=/home/jonathanmorgan/.virtualenvs
 - name: comment out WORKON_HOME
@@ -141,7 +151,7 @@
     path: "/home/{{ ansible_user }}/.bashrc"
     regexp: '^(export WORKON_HOME=/home/{{ ansible_user }}/.virtualenvs)$'
     replace: '#\1'
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # export PROJECT_HOME=$HOME/work/vew-projects
 - name: comment out PROJECT_HOME
@@ -149,7 +159,7 @@
     path: "/home/{{ ansible_user }}/.bashrc"
     regexp: '^(export PROJECT_HOME=$HOME/work/vew-projects)$'
     replace: '#\1'
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # source /usr/local/bin/virtualenvwrapper.sh
 - name: comment out source virtualenvwrapper.sh
@@ -157,7 +167,7 @@
     path: "/home/{{ ansible_user }}/.bashrc"
     regexp: '^(source /usr/local/bin/virtualenvwrapper.sh)$'
     replace: '#\1'
-  when: do_python == true
+  when: do_miniconda3 == true
 
 #------------------------------------------------------------------------------#
 # add miniconda virtualenv setup
@@ -167,14 +177,14 @@
   lineinfile:
     path: "/home/{{ ansible_user }}/.bashrc"
     line: export WORKON_HOME=$HOME/.virtualenvs
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # export PROJECT_HOME=$HOME/work/vew-projects
 - name: add virtualenv init to .bashrc - project home
   lineinfile:
     path: "/home/{{ ansible_user }}/.bashrc"
     line: export PROJECT_HOME=$HOME/work/vew-projects
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # if on CentOS, where latest python has to be installed alongside system python
 
@@ -183,18 +193,18 @@
   lineinfile:
     path: "/home/{{ ansible_user }}/.bashrc"
     line: export VIRTUALENVWRAPPER_PYTHON=/opt/miniconda3/bin/python
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # export VIRTUALENVWRAPPER_VIRTUALENV=/opt/miniconda3/bin/virtualenv
 - name: add virtualenv init to .bashrc - path to virtualenv executable
   lineinfile:
     path: "/home/{{ ansible_user }}/.bashrc"
     line: VIRTUALENVWRAPPER_VIRTUALENV=/opt/miniconda3/bin/virtualenv
-  when: do_python == true
+  when: do_miniconda3 == true
 
 # source /opt/miniconda3/bin/virtualenvwrapper.sh
 - name: add virtualenv init to .bashrc - source virtualenvwrapper init script.
   lineinfile:
     path: "/home/{{ ansible_user }}/.bashrc"
     line: source /opt/miniconda3/bin/virtualenvwrapper.sh
-  when: do_python == true
+  when: do_miniconda3 == true

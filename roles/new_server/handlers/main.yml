@@ -9,3 +9,10 @@
   command: dnf clean metadata
   args:
     warn: no
+
+- name: yum-clean-metadata
+  become: yes
+  become_user: root
+  command: yum clean metadata
+  args:
+    warn: no

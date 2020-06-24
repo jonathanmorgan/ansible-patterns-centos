@@ -1,5 +1,7 @@
 ---
-# This playbook deploys the whole research application stack.
+# This playbook deploys the apache role.
+
+# Expects new_server and common to already have been run.
 
 #- name: set up new servers
 #  hosts: new_servers
@@ -15,29 +17,3 @@
   hosts: apache_servers
   roles:
     - apache
-
-#- name: configure and deploy the PostgreSQL database
-#  hosts: postgres_servers
-#  roles:
-#    - postgresql
-
-#- name: deploy jupyterhub server
-#  hosts: jupyterhub_servers
-#  roles:
-#    - jupyterhub
-
-#- name: deploy R
-#  hosts: r_servers
-#  roles:
-#    - r
-
-#- name: deploy RStudio server
-#  hosts: rstudio_servers
-#  roles:
-#    - rstudio
-
-#- name: deploy django project
-#  hosts: django_servers
-#  roles:
-#    - django_project
-
