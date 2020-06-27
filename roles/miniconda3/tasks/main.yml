@@ -60,20 +60,6 @@
     - do_miniconda3 == true
     - do_miniconda3_links == true
 
-# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1 /usr/local/lib
-- name: add link to libpython3.7m.so.1 to /usr/local/lib
-  become: yes
-  become_user: root
-  file:
-    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so.1.0"
-    dest: /usr/local/lib/libpython3.7m.so.1
-    owner: root
-    group: root
-    state: link
-  when:
-    - do_miniconda3 == true
-    - do_miniconda3_links == true
-
 # sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1.0 /usr/local/lib
 - name: add link to libpython3.7m.so.1.0 to /usr/local/lib
   become: yes
@@ -87,6 +73,53 @@
   when:
     - do_miniconda3 == true
     - do_miniconda3_links == true
+
+#------------------------------------------------------------------------------#
+# add links to python 3.7 libraries to ld config:
+
+# create side lib folder {{ miniconda_lib_link_folder }}
+- name: make sure there is a "{{ miniconda_lib_link_folder }}" folder
+  become: yes
+  become_user: root
+  file:
+    path: "{{ miniconda_lib_link_folder }}"
+    state: directory
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
+    - miniconda_lib_link_folder != ""
+
+# link libs into {{ miniconda_lib_link_folder }}
+
+# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so {{ miniconda_lib_link_folder }}
+- name: add link to libpython3.7m.so to {{ miniconda_lib_link_folder }}
+  become: yes
+  become_user: root
+  file:
+    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so"
+    dest: "{{ miniconda_lib_link_folder }}/libpython3.7m.so"
+    owner: root
+    group: root
+    state: link
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
+    - miniconda_lib_link_folder != ""
+
+# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1.0 {{ miniconda_lib_link_folder }}
+- name: add link to libpython3.7m.so.1.0 to {{ miniconda_lib_link_folder }}
+  become: yes
+  become_user: root
+  file:
+    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so.1.0"
+    dest: "{{ miniconda_lib_link_folder }}/libpython3.7m.so.1.0"
+    owner: root
+    group: root
+    state: link
+  when:
+    - do_miniconda3 == true
+    - do_miniconda3_links == true
+    - miniconda_lib_link_folder != ""
 
 # configure ld to find shared Python libs
 - name: configure ld to find shared Python 3 libs.

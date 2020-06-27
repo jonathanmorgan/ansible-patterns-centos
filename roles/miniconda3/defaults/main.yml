@@ -1,6 +1,7 @@
 # python
 do_miniconda3: true
-do_miniconda3_links: false 
+do_miniconda3_links: true 
 miniconda_script: Miniconda3-latest-Linux-x86_64.sh
 miniconda_url: https://repo.anaconda.com/miniconda/{{ miniconda_script }}
 miniconda_install_folder: /opt/miniconda3
+miniconda_lib_link_folder: /opt/lib
