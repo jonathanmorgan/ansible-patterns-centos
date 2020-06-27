@@ -90,6 +90,10 @@
     - miniconda_lib_link_folder != ""
 
 # link libs into {{ miniconda_lib_link_folder }}
+# - Long story short, you need to just link the python libs that mod_wsgi needs,
+#     rather than link all of anaconda's libs, because Anaconda's libs
+#     conflict with ones used by CentOS core programs, and this will cause your
+#     system to seize up.
 
 # sudo ln -s /opt/miniconda3/lib/libpython3.7m.so {{ miniconda_lib_link_folder }}
 - name: add link to libpython3.7m.so to {{ miniconda_lib_link_folder }}
