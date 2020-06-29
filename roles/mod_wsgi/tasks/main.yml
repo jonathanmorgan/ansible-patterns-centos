@@ -92,7 +92,7 @@
   when:
     - mod_wsgi_source_exists.stat.exists == true
 
-# - untar source tarball
+# untar source tarball
 - name: untar mod_wsgi source tarball {{ mod_wsgi_source_tarball_path }}
   unarchive:
     src: "{{ mod_wsgi_source_tarball_path }}"
