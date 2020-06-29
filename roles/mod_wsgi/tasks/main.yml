@@ -1,0 +1,151 @@
+---
+# This playbook will compile and install mod_wsgi, compiled to work with the
+#     Python install specified in the variable {{ python_bin_path }}.
+# NOTE: uses variables being set in defaults/main.yml.
+
+#------------------------------------------------------------------------------#
+# Apache 2.4 mod_wsgi
+#------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------#
+# download mod_wsgi
+
+# does install file already exist?
+- name: Ansible check if install file already downloaded to {{ ansible_user_home_folder }}/Downloads/{{ mod_wsgi_version }}.tar.gz.
+  stat:
+    path: "{{ mod_wsgi_source_tarball_path }}"
+  register: mod_wsgi_source_tarball_exists
+
+# - download latest mod_wsgi source: https://github.com/GrahamDumpleton/mod_wsgi/releases
+- name: Download latest mod_wsgi source tarball
+  get_url:
+    url: "https://github.com/GrahamDumpleton/mod_wsgi/archive/{{ mod_wsgi_version }}.tar.gz"
+    dest: "{{ mod_wsgi_source_tarball_path }}"
+    mode: '0755'
+  when:
+    - mod_wsgi_source_tarball_exists.stat.exists == false
+
+#------------------------------------------------------------------------------#
+# backup any existing mod_wsgi.so and wsgi.conf
+
+# does mod_wsgi module already exist?
+- name: Ansible check if mod_wsgi module so file {{ mod_wsgi_so_path }} exists
+  stat:
+    path: "{{ mod_wsgi_so_path }}"
+  register: mod_wsgi_so_exists
+
+# does wsgi.conf already exist?
+- name: Ansible check if {{ wsgi_conf_file_path }} exists
+  stat:
+    path: "{{ wsgi_conf_file_path }}"
+  register: wsgi_conf_exists
+
+# if so, move it to ~/archive/<date>/
+
+# create ~/archive folder
+- name: make sure there is a {{ ansible_user_home_folder }}/archive folder
+  file:
+    path: "{{ ansible_user_home_folder }}/archive"
+    state: directory
+  when: ( mod_wsgi_so_exists.stat.exists == true ) or ( wsgi_conf_exists.stat.exists == true )
+
+# create ~/archive/YYYY-MM-DD folder
+- name: make sure there is a {{ ansible_user_home_folder }}/archive/{{ ansible_date_time.date }} folder
+  file:
+    path: "{{ ansible_user_home_folder }}/archive/{{ ansible_date_time.date }}"
+    state: directory
+  when: ( mod_wsgi_so_exists.stat.exists == true ) or ( wsgi_conf_exists.stat.exists == true )
+
+# copy mod_wsgi.so to archive folder.
+- name: Copy {{ mod_wsgi_so_path }} to ~/archive/{{ ansible_date_time.date }}.
+  copy:
+    src: "{{ mod_wsgi_so_path }}"
+    dest: "{{ ansible_user_home_folder }}/archive/{{ ansible_date_time.date }}"
+    remote_src: yes
+  when:
+    - mod_wsgi_so_exists.stat.exists == true
+
+# copy wsgi.conf to archive folder.
+- name: Copy {{ wsgi_conf_file_path }} to ~/archive/{{ ansible_date_time.date }}.
+  copy:
+    src: "{{ wsgi_conf_file_path }}"
+    dest: "{{ ansible_user_home_folder }}/archive/{{ ansible_date_time.date }}"
+    remote_src: yes
+  when:
+    - wsgi_conf_exists.stat.exists == true
+
+#------------------------------------------------------------------------------#
+# compile and install mod_wsgi
+
+# clear existing source directory if present.
+- name: Ansible check if mod_wsgi source folder {{ mod_wsgi_source_path }} exists.
+  stat:
+    path: "{{ mod_wsgi_source_path }}"
+  register: mod_wsgi_source_exists
+
+- name: Remove mod_wsgi source folder {{ mod_wsgi_source_path }}
+  become: yes
+  become_user: root
+  file:
+    path: "{{ mod_wsgi_source_path }}"
+    state: absent
+  when:
+    - mod_wsgi_source_exists.stat.exists == true
+
+# - untar source tarball
+- name: untar mod_wsgi source tarball {{ mod_wsgi_source_tarball_path }}
+  unarchive:
+    src: "{{ mod_wsgi_source_tarball_path }}"
+    dest: "{{ mod_wsgi_work_path }}"
+    remote_src: yes
+
+# configure
+- name: run configure --with-python={{ python_bin_path }}
+  shell: "{{ mod_wsgi_source_path }}/configure --with-python={{ python_bin_path }}"
+  args:
+    chdir: "{{ mod_wsgi_source_path }}"
+
+# make
+- name: run make in source directory ({{ mod_wsgi_source_path }}).
+  shell: "make --directory={{ mod_wsgi_source_path }}"
+  args:
+    chdir: "{{ mod_wsgi_source_path }}"
+
+# stop apache
+- name: stop httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: stopped
+
+# make install
+- name: run make install in source directory ({{ mod_wsgi_source_path }}).
+  become: yes
+  become_user: root
+  shell: "make --directory={{ mod_wsgi_source_path }} install"
+  args:
+    chdir: "{{ mod_wsgi_source_path }}"
+
+#------------------------------------------------------------------------------#
+# add mod_wsgi to apache
+
+# place wsgi.conf in {{ httpd_conf_folder }}
+- name: place wsgi.conf in {{ httpd_conf_folder }}
+  become: yes
+  become_user: root
+  template:
+    src: wsgi.conf.j2
+    dest: "{{ wsgi_conf_file_path }}"
+  notify: restart httpd
+
+#------------------------------------------------------------------------------#
+# start apache
+
+# stop apache
+- name: start httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: started

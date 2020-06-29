@@ -1,0 +1,11 @@
+# python
+mod_wsgi_version: 4.7.1
+python_bin_path: /opt/miniconda3/bin/python
+mod_wsgi_work_path: "{{ ansible_user_home_folder }}/Downloads/mod_wsgi/{{ mod_wsgi_version }}"
+mod_wsgi_source_tarball_path: "{{ mod_wsgi_work_path }}/{{ mod_wsgi_version }}.tar.gz"
+mod_wsgi_source_path: "{{ mod_wsgi_work_path }}/mod_wsgi-{{ mod_wsgi_version }}"
+httpd_modules_path: /usr/lib64/httpd/modules
+mod_wsgi_so_path: "{{ httpd_modules_path }}/mod_wsgi.so"
+httpd_conf_folder: /etc/httpd/conf.d
+wsgi_conf_file_name: wsgi.conf
+wsgi_conf_file_path: "{{ httpd_conf_folder }}/{{ wsgi_conf_file_name }}"

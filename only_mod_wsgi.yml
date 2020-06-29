@@ -1,0 +1,7 @@
+---
+# This playbook deploys the whole research application stack.
+
+- name: set up CVNC server
+  hosts: mod_wsgi_servers
+  roles:
+    - mod_wsgi

@@ -1,0 +1,17 @@
+---
+# Handler for the webtier: handlers are called by other plays.
+# See http://docs.ansible.com/playbooks_intro.html for more information about handlers.
+
+# restart httpd
+- name: restart httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: restarted
+
+# reload firewall
+- name: reload firewall
+  become: yes
+  become_user: root
+  shell: firewall-cmd --reload
