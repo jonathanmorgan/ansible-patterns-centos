@@ -1,0 +1,7 @@
+---
+# This playbook deploys postresql - depends on miniconda being installed.
+
+- name: configure and deploy the PostgreSQL database
+  hosts: postgres_servers
+  roles:
+    - postgresql_conda

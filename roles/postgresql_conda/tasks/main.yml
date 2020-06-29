@@ -1,0 +1,95 @@
+---
+# This playbook will install and configure postgresql.
+
+# see if there is a conda environment for postgresql.
+- name: Check for presence of postgresql env "{{ postgresql_conda_env }}"
+  shell: source {{ miniconda_bin_path }}/activate && conda info --envs | grep {{ postgresql_conda_env }}
+  register: conda_env_exists_check
+  failed_when: conda_env_exists_check.rc == 2
+
+# To see detailed output
+- debug:
+    var: conda_env_exists_check
+
+# if no environment, create one.
+- name: Create postgresql env "{{ postgresql_conda_env }}" if not already present.
+  shell: source {{ miniconda_bin_path }}/activate && conda create --name {{ postgresql_conda_env }} --yes
+  when:
+    - conda_env_exists_check.rc == 1
+    - conda_env_exists_check.stdout == ""
+
+# Install PostgreSQL
+- name: Install Postgresql in conda environment
+  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && conda install postgresql --yes
+
+# check if database directory already exists.
+- name: Ansible check if directory {{ postgresql_data_path }} exists
+  stat:
+    path: "{{ postgresql_data_path }}"
+  register: postgresql_data_folder_exists
+
+# move existing data directory aside.
+- name: move existing data directory {{ postgresql_data_path }} aside.
+  shell: mv {{ postgresql_data_path }} {{ postgresql_home_path }}/{{ postgresql_data_folder_name }}-{{ ansible_date_time.iso8601_basic_short }}
+  when: postgresql_data_folder_exists.stat.exists == true
+
+# create directory to hold database
+- name: make sure there is a "{{ postgresql_data_path }}" folder
+  file:
+    path: "{{ postgresql_data_path }}"
+    state: directory
+
+# init db in {{ postgresql_data_path }}
+- name: init db in {{ postgresql_data_path }}
+  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && initdb -D {{ postgresql_data_path }}
+
+# start database in {{ postgresql_data_path }}
+- name: start database in {{ postgresql_data_path }}
+  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_home_path }}/logfile-{{ ansible_date_time.iso8601_basic_short }} start 
+
+# set to listen on defined listen_addresses.
+- name: Set listen_addresses for postgresql
+  become: yes
+  become_user: "{{ postgresql_user }}"
+  lineinfile:
+    path: "{{ postgresql_config_path }}/postgresql.conf"
+    line: "listen_addresses = '{{server_pgsql_listen_addresses}}'"
+  notify: restart postgresql
+
+# allow database username/password connections.
+- name: Set listen_addresses for postgresql
+  become: yes
+  become_user: "{{ postgresql_user }}"
+  lineinfile:
+    path: "{{ postgresql_config_path }}/pg_hba.conf"
+    line: 'host all all  0.0.0.0/0 md5'
+  notify: restart postgresql
+
+# open firewall for http
+- name: Allow PostgreSQL port
+  become: yes
+  become_user: root
+  shell: firewall-cmd --permanent --zone=public --add-service=postgresql
+  notify: reload firewall
+
+# install psycopg2 in python 3.
+#- name: install psycopg2
+#  become: yes
+#  become_user: root
+#  pip:
+#    executable: pip3
+#    name: psycopg2
+
+# create non-postgres admin user?
+- name: Create non-postgres admin user
+  #become: yes
+  #become_user: "{{ postgresql_user }}"
+  #postgresql_user:
+  #  #login_host: localhost
+  #  name: '{{server_pgsql_admin_user}}'
+  #  password: '{{server_pgsql_admin_password}}'
+  #  role_attr_flags: SUPERUSER
+  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && psql postgres -c "DO \$do\$ BEGIN IF NOT EXISTS( SELECT * FROM pg_catalog.pg_roles WHERE rolname = '{{server_pgsql_admin_user}}') THEN CREATE USER {{server_pgsql_admin_user}} WITH PASSWORD '{{server_pgsql_admin_password}}' SUPERUSER; END IF; END \$do\$;"
+  when:
+    - server_pgsql_admin_user != ""
+    - server_pgsql_admin_password != ""

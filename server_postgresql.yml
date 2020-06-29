@@ -1,0 +1,22 @@
+---
+# This playbook deploys a postgresql server.
+
+- name: set up new servers
+  hosts: new_servers
+  roles:
+    - new_server
+
+- name: apply common configuration to all nodes
+  hosts: all
+  roles:
+    - common
+
+- name: set up isolated python environment on server
+  hosts: miniconda3_servers
+  roles:
+    - miniconda3
+
+- name: configure and deploy the PostgreSQL database
+  hosts: postgres_servers
+  roles:
+    - postgresql_conda

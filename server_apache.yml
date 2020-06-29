@@ -16,27 +16,12 @@
   roles:
     - apache
 
-#- name: configure and deploy the PostgreSQL database
-#  hosts: postgres_servers
-#  roles:
-#    - postgresql
+- name: set up isolated python environment on server
+  hosts: miniconda3_servers
+  roles:
+    - miniconda3
 
-#- name: deploy jupyterhub server
-#  hosts: jupyterhub_servers
-#  roles:
-#    - jupyterhub
-
-#- name: deploy R
-#  hosts: r_servers
-#  roles:
-#    - r
-
-#- name: deploy RStudio server
-#  hosts: rstudio_servers
-#  roles:
-#    - rstudio
-
-#- name: deploy django project
-#  hosts: django_servers
-#  roles:
-#    - django_project
+- name: install and configure mod_wsgi to use miniconda to run Python applications through apache.
+  hosts: mod_wsgi_servers
+  roles:
+    - mod_wsgi

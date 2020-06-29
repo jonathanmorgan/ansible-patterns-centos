@@ -1,7 +1,7 @@
 ---
 # This playbook deploys the whole research application stack.
 
-- name: set up CVNC server
+- name: install and configure mod_wsgi to use miniconda to run Python applications through apache.
   hosts: mod_wsgi_servers
   roles:
     - mod_wsgi
