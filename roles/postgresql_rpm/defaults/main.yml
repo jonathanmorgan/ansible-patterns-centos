@@ -1,4 +1,5 @@
 # postgresql via conda
+server_pgsql_version: 12
 postgresql_user: "{{ ansible_user }}"
 postgresql_home_path: "{{ ansible_user_home_folder }}/postgresql"
 postgresql_data_folder_name: postgresql_data

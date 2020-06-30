@@ -32,9 +32,9 @@
   become_user: root
   yum:
     name:
-      - postgresql12
-      - postgresql12-server
-      - postgresql12-devel
+      - postgresql{{ server_pgsql_version }}
+      - postgresql{{ server_pgsql_version }}-server
+      - postgresql{{ server_pgsql_version }}-devel
   when: server_centos_version == "7"
 
 - name: Install Postgresql
@@ -42,23 +42,23 @@
   become_user: root
   dnf:
     name:
-      - postgresql12
-      - postgresql12-server
-      - postgresql12-devel
+      - postgresql{{ server_pgsql_version }}
+      - postgresql{{ server_pgsql_version }}-server
+      - postgresql{{ server_pgsql_version }}-devel
   when: server_centos_version == "8"
 
 # init db in {{ postgresql_data_path }}
 - name: init db in {{ postgresql_data_path }}
   become: yes
   become_user: root
-  shell: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  shell: /usr/pgsql-{{ server_pgsql_version }}/bin/postgresql-{{ server_pgsql_version }}-setup initdb
 
 # start and enable database
-- name: enable postgresql-12
+- name: enable postgresql-{{ server_pgsql_version }}
   become: yes
   become_user: root
   service:
-    name: postgresql-12
+    name: postgresql-{{ server_pgsql_version }}
     state: started
     enabled: yes
 
