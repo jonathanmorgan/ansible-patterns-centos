@@ -1,0 +1,110 @@
+---
+# This playbook will install and configure postgresql from RPM.
+
+# install PostgreSQL RPM from postgresql.org
+- name: install PostgreSQL RPM
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  when: server_centos_version == "7"
+
+# install PostgreSQL RPM from postgresql.org
+- name: install PostgreSQL RPM
+  become: yes
+  become_user: root
+  dnf:
+    name:
+      - https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  when: server_centos_version == "8"
+
+# Disable default postgresql module in CentOS 8
+- name: disable postgresql module
+  become: yes
+  become_user: root
+  shell: dnf -qy module disable postgresql
+  when: server_centos_version == "8"
+
+# Install PostgreSQL
+- name: Install Postgresql
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - postgresql12
+      - postgresql12-server
+      - postgresql12-devel
+  when: server_centos_version == "7"
+
+- name: Install Postgresql
+  become: yes
+  become_user: root
+  dnf:
+    name:
+      - postgresql12
+      - postgresql12-server
+      - postgresql12-devel
+  when: server_centos_version == "8"
+
+# init db in {{ postgresql_data_path }}
+- name: init db in {{ postgresql_data_path }}
+  become: yes
+  become_user: root
+  shell: /usr/pgsql-12/bin/postgresql-12-setup initdb
+
+# start and enable database
+- name: enable postgresql-12
+  become: yes
+  become_user: root
+  service:
+    name: postgresql-12
+    state: started
+    enabled: yes
+
+# set to listen on defined listen_addresses.
+- name: Set listen_addresses for postgresql
+  become: yes
+  become_user: "{{ postgresql_user }}"
+  lineinfile:
+    path: "{{ postgresql_config_path }}/postgresql.conf"
+    line: "listen_addresses = '{{server_pgsql_listen_addresses}}'"
+  notify: restart postgresql
+
+# allow database username/password connections.
+- name: Set listen_addresses for postgresql
+  become: yes
+  become_user: "{{ postgresql_user }}"
+  lineinfile:
+    path: "{{ postgresql_config_path }}/pg_hba.conf"
+    line: 'host all all  0.0.0.0/0 md5'
+  notify: restart postgresql
+
+# open firewall for http
+- name: Allow PostgreSQL port
+  become: yes
+  become_user: root
+  shell: firewall-cmd --permanent --zone=public --add-service=postgresql
+  notify: reload firewall
+
+# install psycopg2 in python 3.
+#- name: install psycopg2
+#  become: yes
+#  become_user: root
+#  pip:
+#    executable: pip3
+#    name: psycopg2
+
+# create non-postgres admin user?
+- name: Create non-postgres admin user
+  #become: yes
+  #become_user: "{{ postgresql_user }}"
+  #postgresql_user:
+  #  #login_host: localhost
+  #  name: '{{server_pgsql_admin_user}}'
+  #  password: '{{server_pgsql_admin_password}}'
+  #  role_attr_flags: SUPERUSER
+  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && psql postgres -c "DO \$do\$ BEGIN IF NOT EXISTS( SELECT * FROM pg_catalog.pg_roles WHERE rolname = '{{server_pgsql_admin_user}}') THEN CREATE USER {{server_pgsql_admin_user}} WITH PASSWORD '{{server_pgsql_admin_password}}' SUPERUSER; END IF; END \$do\$;"
+  when:
+    - server_pgsql_admin_user != ""
+    - server_pgsql_admin_password != ""

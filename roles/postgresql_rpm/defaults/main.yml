@@ -1,0 +1,7 @@
+# postgresql via conda
+postgresql_user: "{{ ansible_user }}"
+postgresql_home_path: "{{ ansible_user_home_folder }}/postgresql"
+postgresql_data_folder_name: postgresql_data
+postgresql_data_path: "{{ postgresql_home_path }}/{{ postgresql_data_folder_name }}"
+postgresql_config_path: "{{ postgresql_data_path }}"
+postgresql_command_prefix: "source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && "
