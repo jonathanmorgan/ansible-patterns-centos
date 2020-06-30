@@ -1,4 +1,5 @@
 # postgresql via conda
+server_pgsql_version: 12
 miniconda_install_folder: /opt/miniconda3
 miniconda_bin_path: "{{ miniconda_install_folder }}/bin"
 postgresql_user: "{{ ansible_user }}"
