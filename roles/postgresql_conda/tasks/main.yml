@@ -3,7 +3,7 @@
 
 # see if there is a conda environment for postgresql.
 - name: Check for presence of postgresql env "{{ postgresql_conda_env }}"
-  shell: source {{ miniconda_bin_path }}/activate && conda info --envs | grep {{ postgresql_conda_env }}
+  shell: source {{ anaconda_bin_path }}/activate && conda info --envs | grep {{ postgresql_conda_env }}
   register: conda_env_exists_check
   failed_when: conda_env_exists_check.rc == 2
 
@@ -13,14 +13,14 @@
 
 # if no environment, create one.
 - name: Create postgresql env "{{ postgresql_conda_env }}" if not already present.
-  shell: source {{ miniconda_bin_path }}/activate && conda create --name {{ postgresql_conda_env }} --yes
+  shell: source {{ anaconda_bin_path }}/activate && conda create --name {{ postgresql_conda_env }} --yes
   when:
     - conda_env_exists_check.rc == 1
     - conda_env_exists_check.stdout == ""
 
 # Install PostgreSQL
 - name: Install Postgresql in conda environment
-  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && conda install postgresql --yes
+  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && conda install postgresql --yes
 
 # check if database directory already exists.
 - name: Ansible check if directory {{ postgresql_data_path }} exists
@@ -41,11 +41,11 @@
 
 # init db in {{ postgresql_data_path }}
 - name: init db in {{ postgresql_data_path }}
-  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && initdb -D {{ postgresql_data_path }}
+  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && initdb -D {{ postgresql_data_path }}
 
 # start database in {{ postgresql_data_path }}
 - name: start database in {{ postgresql_data_path }}
-  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_home_path }}/logfile-{{ ansible_date_time.iso8601_basic_short }} start 
+  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_home_path }}/logfile-{{ ansible_date_time.iso8601_basic_short }} start
 
 # set to listen on defined listen_addresses.
 - name: Set listen_addresses for postgresql
@@ -89,7 +89,7 @@
   #  name: '{{server_pgsql_admin_user}}'
   #  password: '{{server_pgsql_admin_password}}'
   #  role_attr_flags: SUPERUSER
-  shell: source {{ miniconda_bin_path }}/activate {{ postgresql_conda_env }} && psql postgres -c "DO \$do\$ BEGIN IF NOT EXISTS( SELECT * FROM pg_catalog.pg_roles WHERE rolname = '{{server_pgsql_admin_user}}') THEN CREATE USER {{server_pgsql_admin_user}} WITH PASSWORD '{{server_pgsql_admin_password}}' SUPERUSER; END IF; END \$do\$;"
+  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && psql postgres -c "DO \$do\$ BEGIN IF NOT EXISTS( SELECT * FROM pg_catalog.pg_roles WHERE rolname = '{{server_pgsql_admin_user}}') THEN CREATE USER {{server_pgsql_admin_user}} WITH PASSWORD '{{server_pgsql_admin_password}}' SUPERUSER; END IF; END \$do\$;"
   when:
     - server_pgsql_admin_user != ""
     - server_pgsql_admin_password != ""
