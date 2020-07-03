@@ -65,7 +65,7 @@
     line: 'host all all  0.0.0.0/0 md5'
   notify: restart postgresql
 
-# open firewall for http
+# open firewall for postgresql (5432)
 - name: Allow PostgreSQL port
   become: yes
   become_user: root

@@ -24,7 +24,7 @@
 - name: deploy jupyterhub server
   hosts: jupyterhub_servers
   roles:
-    - jupyterhub
+    - jupyterhub_conda
 
 #- name: deploy R
 #  hosts: r_servers

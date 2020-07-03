@@ -1,89 +1,44 @@
 ---
 # This role will download and install jupyterhub server.
 
-# install jupyterhub depenencies
-- name: install jupyterhub dependencies
+# create jupyterhub config folder (defauts to /etc/jupyterhub)
+- name: create jupyterhub config folder
   become: yes
   become_user: root
-  dnf:
-    name:
-      - zlib-devel
-      - bzip2-devel
-      - openssl-devel
-      - ncurses-devel
-      - sqlite-devel
-      - readline-devel
-      - tk-devel
-      - gdbm-devel
-      - db4-devel
-      - libpcap-devel
-      - xz-devel
-      - npm
-    state: present
-  when: server_centos_package_manager == "dnf"
+  file:
+    path: "{{jupyterhub_config_folder}}"
+    state: directory
 
-- name: install jupyterhub dependencies
-  become: yes
-  become_user: root
-  yum:
-    name:
-      - zlib-devel
-      - bzip2-devel
-      - openssl-devel
-      - ncurses-devel
-      - sqlite-devel
-      - readline-devel
-      - tk-devel
-      - gdbm-devel
-      - db4-devel
-      - libpcap-devel
-      - xz-devel
-      - npm
-    state: present
-  when: server_centos_package_manager == "yum"
+# see if there is a conda environment for jupyterhub.
+- name: Check for presence of jupyterhub conda env "{{ jupyterhub_conda_env }}"
+  shell: source {{ anaconda_bin_path }}/activate && conda info --envs | grep {{ jupyterhub_conda_env }}
+  register: conda_env_exists_check
+  failed_when: conda_env_exists_check.rc == 2
 
-# install proxy using npm
-#     sudo npm install -g configurable-http-proxy
-- name: install configurable-http-proxy (npm)
-  become: yes
-  become_user: root
-  npm:
-    name: configurable-http-proxy
-    global: yes
-    state: latest
+# To see detailed output
+- debug:
+    var: conda_env_exists_check
 
-# cython in python 3.
-- name: install cython
+# if no environment, create one.
+- name: Create jupyterhub env "{{ jupyterhub_conda_env }}" if not already present.
   become: yes
   become_user: root
-  pip:
-    executable: "{{ jupyterhub_pip_executable }}"
-    name: cython
-    state: latest
+  shell: source {{ anaconda_bin_path }}/activate && conda create --{{ jupyterhub_conda_env_type }} {{ jupyterhub_conda_env }} --yes
+  when:
+    - conda_env_exists_check.rc == 1
+    - conda_env_exists_check.stdout == ""
 
-# pyOpenSSL in python 3.
-- name: install pyOpenSSL
+# Install jupyterhub
+- name: Install jupyterhub in conda environment
   become: yes
   become_user: root
-  pip:
-    executable: pip3
-    name: pyOpenSSL
-    state: latest
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install jupyterhub --yes
 
-# install jupyterhub and ipython notebook in python 3.
-- name: install jupyterhub and ipython notebook
+# Install jupyterhub-related packages
+- name: Install jupyterhub-related packages in conda environment
   become: yes
   become_user: root
-  pip:
-    executable: "{{ jupyterhub_pip_executable }}"
-    name:
-      - jupyterhub
-      - ipython[notebook]
-      - jupyterhub-systemdspawner
-      - jupyter_contrib_nbextensions
-      - jupyter_nbextensions_configurator
-      - jupyterlab
-    state: latest
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator --yes
 
 # ==> configuration
 
@@ -105,7 +60,7 @@
 - name: initialize jupyterhub configuration
   become: yes
   become_user: root
-  shell: jupyterhub --generate-config
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && jupyterhub --generate-config
   args:
     chdir: "{{jupyterhub_config_folder}}"
   when: jupyterhub_config.stat.exists == False
@@ -135,7 +90,7 @@
   when: jupyterhub_configproxy_auth_token != ""
 
 # add admin_users
-- name: Add proxy token value.
+- name: Add admin_users.
   become: yes
   become_user: root
   lineinfile:
@@ -144,7 +99,7 @@
   when: jupyterhub_admin_user_list != ""
 
 # add white list if one specified.
-- name: Add proxy token value.
+- name: Add white list.
   become: yes
   become_user: root
   lineinfile:
@@ -277,6 +232,7 @@
   template:
     src: jupyterhub.service.j2
     dest: /etc/systemd/system/jupyterhub.service
+  when: jupyterhub_install_as_service == true
 
 # Enable jupyterhub service
 - name: Enable jupyterhub service
@@ -286,39 +242,48 @@
     name: jupyterhub
     enabled: True
     use: service
+  when: jupyterhub_install_as_service == true
 
 # Start jupyterhub and set as a startup service
-- name: Enable jupyterhub as a startup service
+- name: Start jupyterhub and set as a startup service
   become: yes
   become_user: root
   service:
     name: jupyterhub
     state: started
     enabled: yes
+  when: jupyterhub_install_as_service == true
 
 # open firewall for jupyterhub
-- name: Allow jupyterhub port
+- name: Allow jupyterhub TCP port
   become: yes
   become_user: root
-  ufw:
-    rule: allow
-    port: 8000
+  shell: firewall-cmd --permanent --zone=public --add-port=8000/tcp
+  notify: reload firewall
+  when: jupyterhub_open_firewall == true
+
+- name: Allow jupyterhub UDP port
+  become: yes
+  become_user: root
+  shell: firewall-cmd --permanent --zone=public --add-port=8000/udp
+  notify: reload firewall
+  when: jupyterhub_open_firewall == true
 
 # add turning on nbextensions
 
 # install juptyer nbextensions
 # (sudo -H) jupyter contrib nbextension install --system --symlink
-- name: install juptyer nbextensions
+- name: install jupyter nbextensions
   become: yes
   become_user: root
-  shell: jupyter contrib nbextension install --system --symlink
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && jupyter contrib nbextension install --system --symlink
 
 # enable nbextensions_configurator.
 # (sudo -H) jupyter nbextensions_configurator enable --system
 - name: enable nbextensions_configurator
   become: yes
   become_user: root
-  shell: jupyter nbextensions_configurator enable --system
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && jupyter nbextensions_configurator enable --system
 
 # and install table of contents in jupyterlab.
 # (sudo -H) jupyter labextension install jupyterlab-toc

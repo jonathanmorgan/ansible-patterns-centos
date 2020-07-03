@@ -1,0 +1,7 @@
+---
+# This playbook deploys jupyterhub server
+
+- name: deploy jupyterhub server
+  hosts: jupyterhub_servers
+  roles:
+    - jupyterhub_conda

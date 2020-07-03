@@ -1,0 +1,31 @@
+# anaconda
+anaconda_install_folder: /opt/miniconda3
+anaconda_bin_path: "{{ anaconda_install_folder }}/bin"
+anaconda_pip_executable: "{{ anaconda_bin_path }}/pip3"
+
+# python
+python_2_pip_executable: "/usr/bin/pip2"
+python_3_pip_executable: "/usr/local/bin/pip3"
+
+# jupyterhub installation
+jupyterhub_config_folder: /etc/jupyterhub
+
+# juptyerhub anaconda env
+jupyterhub_conda_env_type: "prefix"  # "name" for simple environment name, "prefix" if you specify path to environment.
+jupyterhub_conda_env_name: "conda_env"
+jupyterhub_conda_env_path: "{{ jupyterhub_config_folder }}/{{ jupyterhub_conda_env_name }}"
+jupyterhub_conda_env: "{{ jupyterhub_conda_env_path }}"
+jupyterhub_conda_env_bin_path: "{{ jupyterhub_conda_env_path }}/bin"
+
+# jupyterhub configuration
+jupyterhub_pip_executable: "{{ anaconda_pip_executable }}"
+jupyterhub_configproxy_auth_token: replaceme
+jupyterhub_proxy_command_path: ""
+jupyterhub_admin_user_list: "'{{ ansible_user }}'"
+jupyterhub_whitelist_list:
+jupyterhub_ssl_certificate_path: "{{ server_ssl_certificate_path }}"
+jupyterhub_ssl_private_key_path: "{{ server_ssl_private_key_path }}"
+
+# control variables
+jupyterhub_install_as_service: true
+jupyterhub_open_firewall: true
