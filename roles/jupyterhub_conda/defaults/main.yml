@@ -29,3 +29,5 @@ jupyterhub_ssl_private_key_path: "{{ server_ssl_private_key_path }}"
 # control variables
 jupyterhub_install_as_service: true
 jupyterhub_open_firewall: true
+jupyterhub_use_systemdspawner: false
+jupyterhub_is_selinux: true

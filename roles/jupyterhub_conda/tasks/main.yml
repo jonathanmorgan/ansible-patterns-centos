@@ -38,7 +38,7 @@
 - name: Install jupyterhub-related packages in conda environment
   become: yes
   become_user: root
-  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator --yes
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner sudospawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator --yes
 
 # ==> configuration
 
@@ -86,7 +86,7 @@
   become_user: root
   lineinfile:
     path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.JupyterHub.proxy_auth_token = '{{jupyterhub_configproxy_auth_token}}'"
+    line: "c.ConfigurableHTTPProxy.auth_token = '{{jupyterhub_configproxy_auth_token}}'"
   when: jupyterhub_configproxy_auth_token != ""
 
 # add admin_users
@@ -201,6 +201,7 @@
   lineinfile:
     path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
     line: "c.JupyterHub.spawner_class = 'systemdspawner.SystemdSpawner'"
+  when: jupyterhub_use_systemdspawner == true
 
 # FileNotFoundError: [Errno 2] No such file or directory: 'configurable-http-proxy': 'configurable-http-proxy'
 # If you run jupyterhub on startup with systemd, and it won't start, and you encounter the following error when you run "sudo service jupyterhub status":
@@ -326,3 +327,12 @@
 #  become: yes
 #  become_user: root
 #  shell: R -e "IRkernel::installspec(user = FALSE)"
+
+# SELINUX?
+
+# sudo /sbin/restorecon -v /etc/jupyterhub/conda_env/bin/python3.8
+- name: allow jupyterhub to do some thing or another in SELINUX.
+  become: yes
+  become_user: root
+  shell: /sbin/restorecon -v {{ jupyterhub_conda_env_bin_path }}/python3.8
+  when: jupyterhub_is_selinux == true
