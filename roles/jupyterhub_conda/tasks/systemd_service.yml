@@ -26,3 +26,6 @@
     state: started
     enabled: yes
   when: jupyterhub_install_as_service == true
+
+# logging and log rotation:
+# - https://www.canthonyscott.com/deploying-jupyterhub-on-a-mulit-user-centos-server/
