@@ -1,0 +1,7 @@
+# the command(s) the Hub can run on behalf of the above users without needing a password
+# the exact path may differ, depending on how sudospawner was installed
+Cmnd_Alias JUPYTER_CMD = {{ jupyterhub_sudospawner_bin }}
+
+# actually give the Hub user permission to run the above command on behalf
+# of users in the "{{ jupyterhub_user_group }}" group without prompting for a password
+{{ jupyterhub_run_user }} ALL=(%{{ jupyterhub_user_group }}) NOPASSWD:JUPYTER_CMD

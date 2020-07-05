@@ -3,7 +3,7 @@ Description=Jupyterhub
 After=syslog.target network.target
 
 [Service]
-User=root
+User={{ jupyterhub_service_user }}
 ExecStart={{ jupyterhub_conda_env_bin_path }}/jupyterhub -f {{jupyterhub_config_folder}}/jupyterhub_config.py
 WorkingDirectory={{jupyterhub_config_folder}}
 EnvironmentFile={{jupyterhub_config_folder}}/jupyterhub_environment

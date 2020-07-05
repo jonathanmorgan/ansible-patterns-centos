@@ -1,0 +1,11 @@
+#------------------------------------------------------------------------------#
+# ==> systemd spawner
+
+# configure jupyterhub to use systemd spawner.
+- name: configure jupyterhub to use systemd spawner.
+  become: yes
+  become_user: root
+  lineinfile:
+    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
+    line: "c.JupyterHub.spawner_class = 'systemdspawner.SystemdSpawner'"
+  when: jupyterhub_spawner == "systemdspawner"

@@ -1,0 +1,28 @@
+# Create systemd service for jupyterhub.
+- name: Create systemd service for jupyterhub ( {{ jupyterhub_service_name }} )
+  become: yes
+  become_user: root
+  template:
+    src: jupyterhub.service.j2
+    dest: /etc/systemd/system/{{ jupyterhub_service_name }}.service
+  when: jupyterhub_install_as_service == true
+
+# Enable jupyterhub service
+- name: Enable jupyterhub service ( {{ jupyterhub_service_name }} )
+  become: yes
+  become_user: root
+  service:
+    name: "{{ jupyterhub_service_name }}"
+    enabled: True
+    use: service
+  when: jupyterhub_install_as_service == true
+
+# Start jupyterhub and set as a startup service
+- name: Start jupyterhub and set as a startup service ( {{ jupyterhub_service_name }} )
+  become: yes
+  become_user: root
+  service:
+    name: "{{ jupyterhub_service_name }}"
+    state: started
+    enabled: yes
+  when: jupyterhub_install_as_service == true

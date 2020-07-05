@@ -40,6 +40,7 @@
   become_user: root
   shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner sudospawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator --yes
 
+#------------------------------------------------------------------------------#
 # ==> configuration
 
 # create jupyterhub config folder (defauts to /etc/jupyterhub)
@@ -107,101 +108,25 @@
     line: "c.Authenticator.whitelist = [ {{jupyterhub_whitelist_list}} ]"
   when: jupyterhub_whitelist_list != ""
 
-# add certificate to jupyterhub config.
-- name: add certificate to jupyterhub config.
-  become: yes
-  become_user: root
-  lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.JupyterHub.ssl_cert = '{{ jupyterhub_ssl_certificate_path }}'"
-  when: jupyterhub_ssl_certificate_path != ""
-  
-# add private key to jupyterhub configuration.
-- name: Add private key to jupyterhub configuration.
-  become: yes
-  become_user: root
-  lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.JupyterHub.ssl_key = '{{ jupyterhub_ssl_private_key_path }}'"
-  when: jupyterhub_ssl_private_key_path != ""
+#------------------------------------------------------------------------------#
+# SSL certificates
 
-# copy default SSL cert and key to jupyterhub config folder.
-#- name: initialize jupyterhub configuration
-#  become: yes
-#  become_user: root
-#  shell: openssl req -x509 -newkey rsa:4096 -keyout jupyterhub_key.pem -out jupyterhub_cert.pem -days 3650 -nodes
-#  args:
-#    chdir: "{{jupyterhub_config_folder}}"
+- include: ssl.yml
 
-#- name: copy private key
-#  become: yes
-#  become_user: root
-#  copy:
-#    src: /etc/ssl/private/ssl-cert-snakeoil.key
-#    dest: "{{jupyterhub_config_folder}}/jupyterhub_key.pem"
+#------------------------------------------------------------------------------#
 
-#- name: copy public certificate
-#  become: yes
-#  become_user: root
-#  copy:
-#    src: /etc/ssl/certs/ssl-cert-snakeoil.pem
-#    dest: "{{jupyterhub_config_folder}}/jupyterhub_cert.pem"
+#------------------------------------------------------------------------------#
+# Spawners
 
-# generate OpenSSL private key.
-- name: Generate an OpenSSL private key.
-  become: yes
-  become_user: root
-  openssl_privatekey:
-    path: "{{ jupyterhub_config_folder }}/jupyterhub_key.pem"
-  when: jupyterhub_ssl_certificate_path == "" and jupyterhub_ssl_private_key_path == ""
+- name: configure systemd spawner
+  include: systemdspawner.yml
+  when: jupyterhub_spawner == "systemdspawner"
 
-# create certificate signing request (CSR)
-- name: Generate an OpenSSL CSR.
-  become: yes
-  become_user: root
-  openssl_csr:
-    path: "{{ jupyterhub_config_folder }}/jupyterhub.csr"
-    privatekey_path: "{{ jupyterhub_config_folder }}/jupyterhub_key.pem"
-    common_name: "{{ server_name }}"
-  when: jupyterhub_ssl_certificate_path == "" and jupyterhub_ssl_private_key_path == ""
+- name: configure sudospawner
+  include: sudospawner.yml
+  when: jupyterhub_spawner == "sudospawner"
 
-# generate certificate
-- name: Generate a Self-Signed OpenSSL certificate.
-  become: yes
-  become_user: root
-  openssl_certificate:
-    path: "{{ jupyterhub_config_folder }}/jupyterhub_cert.pem"
-    privatekey_path: "{{ jupyterhub_config_folder }}/jupyterhub_key.pem"
-    csr_path: "{{ jupyterhub_config_folder }}/jupyterhub.csr"
-    provider: selfsigned
-  when: jupyterhub_ssl_certificate_path == "" and jupyterhub_ssl_private_key_path == ""
-
-# add certificate to jupyterhub config.
-- name: add certificate to jupyterhub config.
-  become: yes
-  become_user: root
-  lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.JupyterHub.ssl_cert = '{{jupyterhub_config_folder}}/jupyterhub_cert.pem'"
-  when: jupyterhub_ssl_certificate_path == "" and jupyterhub_ssl_private_key_path == ""
-
-# add private key to jupyterhub configuration.
-- name: Add private key to jupyterhub configuration.
-  become: yes
-  become_user: root
-  lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.JupyterHub.ssl_key = '{{jupyterhub_config_folder}}/jupyterhub_key.pem'"
-  when: jupyterhub_ssl_certificate_path == "" and jupyterhub_ssl_private_key_path == ""
-
-# configure jupyterhub to use systemd spawner.
-- name: configure jupyterhub to use systemd spawner.
-  become: yes
-  become_user: root
-  lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.JupyterHub.spawner_class = 'systemdspawner.SystemdSpawner'"
-  when: jupyterhub_use_systemdspawner == true
+#------------------------------------------------------------------------------#
 
 # FileNotFoundError: [Errno 2] No such file or directory: 'configurable-http-proxy': 'configurable-http-proxy'
 # If you run jupyterhub on startup with systemd, and it won't start, and you encounter the following error when you run "sudo service jupyterhub status":
@@ -224,36 +149,12 @@
     line: "#c.ConfigurableHTTPProxy.command = '{{jupyterhub_proxy_command_path}}'"
   when: jupyterhub_proxy_command_path != ""
 
-# ==> systemd service
+#------------------------------------------------------------------------------#
+# systemd service
 
-# Create systemd service for jupyterhub.
-- name: Create systemd service for jupyterhub
-  become: yes
-  become_user: root
-  template:
-    src: jupyterhub.service.j2
-    dest: /etc/systemd/system/jupyterhub.service
-  when: jupyterhub_install_as_service == true
+- include: systemd_service.yml
 
-# Enable jupyterhub service
-- name: Enable jupyterhub service
-  become: yes
-  become_user: root
-  service:
-    name: jupyterhub
-    enabled: True
-    use: service
-  when: jupyterhub_install_as_service == true
-
-# Start jupyterhub and set as a startup service
-- name: Start jupyterhub and set as a startup service
-  become: yes
-  become_user: root
-  service:
-    name: jupyterhub
-    state: started
-    enabled: yes
-  when: jupyterhub_install_as_service == true
+#------------------------------------------------------------------------------#
 
 # open firewall for jupyterhub
 - name: Allow jupyterhub TCP port
