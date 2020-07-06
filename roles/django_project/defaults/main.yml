@@ -1,0 +1,24 @@
+# project basics
+django_project_name: research
+django_database_type: "mysql"  # for now, supported: "mysql", "postgresql"
+
+# django project configuration
+django_virtualenv_name: "{{ django_project_name }}"
+django_virtualenv_python: "{{ python_3_path }}"
+django_virtualenv_path: "{{ virtualenv_folder }}/{{ django_virtualenv_name }}"
+django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
+django_db_package: "{{ server_pgsql_python_package }}"
+django_project_parent_folder_path: "{{ work_folder }}/django"
+django_project_folder_path: "{{ django_project_parent_folder_path }}/{{ django_project_name }}"
+django_config_folder_path: "{{ django_project_folder_path }}/{{ django_project_name }}"
+django_log_file_path: "{{ log_folder }}/django-{{ django_project_name }}.log"
+django_static_folder_path: "{{ server_webroot_folder }}/static"
+django_settings_import: "{{ django_project_name }}.settings"
+django_db_name: "{{ django_project_name }}"
+django_db_username: "django_user"
+django_db_password: "{{ ansible_become_password }}"
+django_db_host: "localhost"
+django_db_port: "5432"
+django_superuser_username: "{{ ansible_user }}"
+django_superuser_password: "{{ ansible_become_password }}"
+django_superuser_email: ""
