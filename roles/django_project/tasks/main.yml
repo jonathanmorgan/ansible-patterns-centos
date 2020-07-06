@@ -1,15 +1,30 @@
 ---
 # Install pre-req packages
-- name: install lxml pre-reqs
+- name: install lxml pre-reqs (dnf)
   become: yes
   become_user: root
-  apt:
+  dnf:
     name:
       - libxml2
-      - libxml2-dev
-      - libxslt1-dev
-      - libyaml-dev
+      - libxml2-devel
+      - libxslt
+      - libxslt-devel
+      - libyaml-devel
     state: present
+  when: server_centos_package_manager == "dnf"
+
+- name: install lxml pre-reqs (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - libxml2
+      - libxml2-devel
+      - libxslt
+      - libxslt-devel
+      - libyaml-devel
+    state: present
+  when: server_centos_package_manager == "yum"
 
 # check if virtualenv already there.
 - name: check if virtualenv exists ({{ django_virtualenv_path }})
@@ -19,7 +34,7 @@
 
 # create virtualenv for django project
 - name: create virtualenv for django project
-  shell: virtualenv {{ django_virtualenv_name }} --python {{ python_3_path }}
+  shell: "{{ django_virtualenv_from_env_bin }}/virtualenv {{ django_virtualenv_name }} --python {{ django_virtualenv_from_env_python }}"
   args:
     chdir: "{{ virtualenv_folder }}/"
   when: django_virtualenv.stat.exists == False
@@ -30,7 +45,7 @@
     virtualenv: "{{ django_virtualenv_path }}"
     name:
       - django
-      - "{{ django_db_package }}"
+      - "{{ django_db_python_package }}"
       - ipython
       - ipykernel
       - django-ajax-selects
@@ -93,7 +108,14 @@
 
 #===============================================================================
 # ==> set up database.
-- include: database_setup.yml
+
+- name: 
+  include: database_setup_postgresql.yml
+  when: django_database_type == "postgresql"
+
+- name: 
+  include: database_setup_mysql.yml
+  when: django_database_type == "mysql"
 
 # create django superuser
 
