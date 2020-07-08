@@ -10,6 +10,7 @@
       - libxslt
       - libxslt-devel
       - libyaml-devel
+      - expect
     state: present
   when: server_centos_package_manager == "dnf"
 
@@ -23,6 +24,7 @@
       - libxslt
       - libxslt-devel
       - libyaml-devel
+      - expect
     state: present
   when: server_centos_package_manager == "yum"
 
@@ -55,6 +57,8 @@
       - w3lib
       - six
     state: latest
+  environment:
+    PATH: "{{ db_postgresql_bin_path }}:$PATH"
 
 # install virtualenv as jupyter kernel
 - name: make {{ django_project_name }} project virtualenv a kernel
@@ -159,7 +163,7 @@
 
 # set password.
 - name: Change password
-  command: "{{ django_project_folder_path }}/changepassword.sh"
+  shell: "{{ django_project_folder_path }}/changepassword.sh"
   args:
     chdir: "{{ django_project_folder_path }}"
   environment:

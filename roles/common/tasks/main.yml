@@ -37,6 +37,7 @@
       - sqlite
       - sqlite-devel
       - vim
+      - expect
     state: present
   when: server_centos_package_manager == "dnf"
 

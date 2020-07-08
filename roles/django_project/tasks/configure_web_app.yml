@@ -19,14 +19,20 @@
   become_user: root
   template:
     src: django-research.conf.j2
-    dest: '/etc/apache2/conf-available/django-{{ django_project_name }}.conf'
+    dest: '/etc/httpd/conf.d/django-{{ django_project_name }}.conf'
+  notify: restart httpd
+  when: django_configure_apache == true
 
-# enable django_research.conf.
-- name: call a2enconf to enable django-{{ django_project_name }}.conf
-  become: yes
-  become_user: root
-  shell: a2enconf django-{{ django_project_name }}
-  notify: restart apache2
+# --> give apache user access to virtualenv
+
+# add apache user to ansible user group.
+
+# change permissions on ansible user's home folder to 750.
+
+# troubleshooting:
+# - https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/modwsgi/
+# - https://stackoverflow.com/questions/55066782/no-module-named-encodings-error-when-deploying-django-app-on-apache-with-mod
+# - 
 
 # --> static files
 
@@ -75,3 +81,15 @@
 #- name: Configure SELinux to allow httpd to connect to remote database
 #  seboolean: name=httpd_can_network_connect_db state=true persistent=yes
 #  when: sestatus.rc != 0
+
+# SELINUX - it is unhappy, just do this... "setsebool -P httpd_enable_homedirs 1"
+- name: Configure SELinux to allow httpd to access homedirs
+  become: yes
+  become_user: root
+  seboolean: name=httpd_enable_homedirs state=true persistent=yes
+
+# and this: setsebool -P httpd_read_user_content 1
+- name: Configure SELinux to allow httpd to access user files
+  become: yes
+  become_user: root
+  seboolean: name=httpd_enable_homedirs state=true persistent=yes

@@ -11,7 +11,6 @@ server_webroot_folder: /var/www/html
 
 # project basics
 django_project_name: research
-django_database_type: "mysql"  # for now, supported: "mysql", "postgresql"
 
 # django project virtualenv
 django_virtualenv_from_env: "{{ anaconda_base_path }}"
@@ -20,19 +19,36 @@ django_virtualenv_from_env_python: "{{ anaconda_base_python }}"  # python where 
 django_virtualenv_name: "{{ django_project_name }}"
 django_virtualenv_path: "{{ virtualenv_folder }}/{{ django_virtualenv_name }}"
 django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
+django_virtualenv_python_version: "3.7"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
 
-# django project database configuration
-db_postgresql_python_package: "psycopg2"
+# django project database constants-ish
+db_postgresql_python_package: "psycopg2-binary"
 db_postgresql_port: "5432"
+db_postgresql_bin_path: "/home/jonathanmorgan/.conda/envs/postgresql_service/bin"  # leave empty if in standard path.
 db_mysql_python_package: "mysqlclient"
 db_mysql_port: "3306"
-django_db_python_package: "{{ db_mysql_python_package }}"
+django_db_engine_mysql: "django.db.backends.mysql"
+django_db_engine_postgresql: "django.db.backends.postgresql"
+django_db_engine_sqlite3: "django.db.backends.sqlite3"
+
+# django project database configuration - postgresql
+django_database_type: "postgresql"  # for now, supported: "mysql", "postgresql"
+django_db_python_package: "{{ db_postgresql_python_package }}"
+django_db_engine: "{{ django_db_engine_postgresql }}"
+django_db_port: "{{ db_postgresql_port }}"  # 5432 for postgresql, 3306 for mysql.
+
+# django project database configuration - mysql
+#django_database_type: "mysql"  # for now, supported: "mysql", "postgresql"
+#django_db_python_package: "{{ db_mysql_python_package }}"
+#django_db_engine: "{{ django_db_engine_mysql }}"
+#django_db_port: "{{ db_mysql_port }}"  # 5432 for postgresql, 3306 for mysql.
+
+# django project database configuration - shared
 django_db_package: "{{ django_db_python_package }}"  # "pyscopg2" for postgresql; "mysqlclient" for MySQL
 django_db_name: "{{ django_project_name }}"
 django_db_username: "django_user"
 django_db_password: "{{ ansible_become_password }}"
 django_db_host: "localhost"
-django_db_port: "{{ db_postgresql_port }}"  # 5432 for postgresql, 3306 for mysql.
 
 # django project locations configuration
 django_project_parent_folder_path: "{{ work_folder }}/django"
@@ -46,3 +62,6 @@ django_settings_import: "{{ django_project_name }}.settings"
 django_superuser_username: "{{ ansible_user }}"
 django_superuser_password: "{{ ansible_become_password }}"
 django_superuser_email: ""
+
+# django setup control variables
+django_configure_apache: true

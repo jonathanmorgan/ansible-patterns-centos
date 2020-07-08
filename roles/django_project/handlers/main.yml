@@ -1,11 +1,33 @@
 ---
-# Handler for the webtier: handlers are called by other plays.
+# Handler to handle common notifications. Handlers are called by other plays.
 # See http://docs.ansible.com/playbooks_intro.html for more information about handlers.
+
+# Handler showing how to clean dnf metadata cache
+- name: dnf-clean-metadata
+  become: yes
+  become_user: root
+  command: dnf clean metadata
+  args:
+    warn: no
+
+# restart httpd
+- name: restart httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: restarted
 
 # restart apache2
 - name: restart apache2
   become: yes
   become_user: root
   service:
-    name: apache2
+    name: httpd
     state: restarted
+
+# reload firewall
+- name: reload firewall
+  become: yes
+  become_user: root
+  shell: firewall-cmd --reload
