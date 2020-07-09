@@ -36,7 +36,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '{{ server_name }}',
-    '{{ server_ip_address }}'
+    '{{ server_ip_address }}',
+    'localhost',
+    '127.0.0.1'
 ]
 
 
@@ -146,7 +148,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/latest/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '{{ server_webroot_folder }}/static'
+STATIC_ROOT = '{{ django_static_folder_path }}'
 
 SESSION_COOKIE_NAME = '{{ django_project_name }}'
 

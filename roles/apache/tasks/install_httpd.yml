@@ -2,25 +2,23 @@
 # These tasks install and configure httpd and mod_wsgi for python 3.
 
 # Install httpd and mod_wsgi for Python 3
-- name: Install OS packages for httpd and mod_wsgi for Python 3 (dnf)
+- name: Install OS packages for httpd (dnf)
   become: yes
   become_user: root
   dnf:
     name:
       - httpd
       - httpd-devel
-      - mod_wsgi
   notify: restart httpd
   when: server_centos_package_manager == "dnf"
 
-- name: Install OS packages for httpd and mod_wsgi for Python 3 (yum)
+- name: Install OS packages for httpd (yum)
   become: yes
   become_user: root
   yum:
     name:
       - httpd
       - httpd-devel
-      - mod_wsgi
   notify: restart httpd
   when: server_centos_package_manager == "yum"
 

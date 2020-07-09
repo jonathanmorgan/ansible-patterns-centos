@@ -16,8 +16,9 @@ django_project_name: research
 django_virtualenv_from_env: "{{ anaconda_base_path }}"
 django_virtualenv_from_env_bin: "{{ anaconda_base_bin_path }}"
 django_virtualenv_from_env_python: "{{ anaconda_base_python }}"  # python where virtualenv and virtualenvwrapper are installed, used to create virtualenv.
+django_virtualenv_home_path: "{{ virtualenv_folder }}"
 django_virtualenv_name: "{{ django_project_name }}"
-django_virtualenv_path: "{{ virtualenv_folder }}/{{ django_virtualenv_name }}"
+django_virtualenv_path: "{{ django_virtualenv_home_path }}/{{ django_virtualenv_name }}"
 django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
 django_virtualenv_python_version: "3.7"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
 
