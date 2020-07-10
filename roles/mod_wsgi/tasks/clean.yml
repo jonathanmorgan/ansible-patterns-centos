@@ -1,0 +1,83 @@
+#------------------------------------------------------------------------------#
+# move aside any existing mod_wsgi.so and wsgi.conf
+
+# does mod_wsgi module already exist?
+- name: Ansible check if mod_wsgi module so file {{ mod_wsgi_so_path }} exists
+  stat:
+    path: "{{ mod_wsgi_so_path }}"
+  register: mod_wsgi_so_exists
+
+# does wsgi.conf already exist?
+- name: Ansible check if {{ wsgi_conf_file_path }} exists
+  stat:
+    path: "{{ wsgi_conf_file_path }}"
+  register: wsgi_conf_exists
+
+# if so, move it to ~/archive/<date_time>/
+
+# create ~/archive folder
+- name: make sure there is a {{ ansible_user_home_folder }}/archive folder
+  file:
+    path: "{{ ansible_user_home_folder }}/archive"
+    state: directory
+  when: ( mod_wsgi_so_exists.stat.exists == true ) or ( wsgi_conf_exists.stat.exists == true )
+
+# create ~/archive/YYYYMMDDTHHMMSS folder
+- name: make sure there is a {{ ansible_user_home_folder }}/archive/{{ ansible_date_time.iso8601_basic_short }} folder
+  file:
+    path: "{{ ansible_user_home_folder }}/archive/{{ ansible_date_time.iso8601_basic_short }}"
+    state: directory
+  when: ( mod_wsgi_so_exists.stat.exists == true ) or ( wsgi_conf_exists.stat.exists == true )
+
+# copy mod_wsgi.so to archive folder.
+- name: Copy {{ mod_wsgi_so_path }} to ~/archive/{{ ansible_date_time.iso8601_basic_short }}.
+  copy:
+    src: "{{ mod_wsgi_so_path }}"
+    dest: "{{ ansible_user_home_folder }}/archive/{{ ansible_date_time.iso8601_basic_short }}"
+    remote_src: yes
+  when:
+    - mod_wsgi_so_exists.stat.exists == true
+
+# delete mod_wsgi.so.
+- name: Delete {{ mod_wsgi_so_path }}.
+  become: yes
+  become_user: root
+  file:
+    path: "{{ mod_wsgi_so_path }}"
+    state: absent
+  when:
+    - mod_wsgi_so_exists.stat.exists == true
+
+# copy wsgi.conf to archive folder.
+- name: Copy {{ wsgi_conf_file_path }} to ~/archive/{{ ansible_date_time.iso8601_basic_short }}.
+  copy:
+    src: "{{ wsgi_conf_file_path }}"
+    dest: "{{ ansible_user_home_folder }}/archive/{{ ansible_date_time.iso8601_basic_short }}"
+    remote_src: yes
+  when:
+    - wsgi_conf_exists.stat.exists == true
+
+# delete wsgi.conf.
+- name: Delete {{ wsgi_conf_file_path }}.
+  become: yes
+  become_user: root
+  file:
+    path: "{{ wsgi_conf_file_path }}"
+    state: absent
+  when:
+    - wsgi_conf_exists.stat.exists == true
+
+# clear existing source directory if present.
+- name: Ansible check if mod_wsgi source folder {{ mod_wsgi_source_path }} exists.
+  stat:
+    path: "{{ mod_wsgi_source_path }}"
+  register: mod_wsgi_source_exists
+
+- name: Remove mod_wsgi source folder {{ mod_wsgi_source_path }}
+  become: yes
+  become_user: root
+  file:
+    path: "{{ mod_wsgi_source_path }}"
+    state: absent
+  when:
+    - mod_wsgi_source_exists.stat.exists == true

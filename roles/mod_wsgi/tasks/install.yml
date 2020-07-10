@@ -1,0 +1,107 @@
+---
+# This playbook will compile and install mod_wsgi, compiled to work with the
+#     Python install specified in the variable {{ mod_wsgi_python_bin_path }}.
+# NOTE: uses variables being set in defaults/main.yml.
+
+#------------------------------------------------------------------------------#
+# Apache 2.4 mod_wsgi
+#------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------#
+# first, archive old install
+- name: clean up old install of mod_wsgi
+  include: clean.yml
+
+#------------------------------------------------------------------------------#
+# download mod_wsgi
+
+# does install file already exist?
+- name: Ansible check if install file already downloaded to {{ ansible_user_home_folder }}/Downloads/{{ mod_wsgi_version }}.tar.gz.
+  stat:
+    path: "{{ mod_wsgi_source_tarball_path }}"
+  register: mod_wsgi_source_tarball_exists
+
+# - download latest mod_wsgi source: https://github.com/GrahamDumpleton/mod_wsgi/releases
+- name: Download latest mod_wsgi source tarball
+  get_url:
+    url: "https://github.com/GrahamDumpleton/mod_wsgi/archive/{{ mod_wsgi_version }}.tar.gz"
+    dest: "{{ mod_wsgi_source_tarball_path }}"
+    mode: '0755'
+  when:
+    - mod_wsgi_source_tarball_exists.stat.exists == false
+
+#------------------------------------------------------------------------------#
+# compile and install mod_wsgi
+
+# clear existing source directory if present.
+- name: Ansible check if mod_wsgi source folder {{ mod_wsgi_source_path }} exists.
+  stat:
+    path: "{{ mod_wsgi_source_path }}"
+  register: mod_wsgi_source_exists
+
+- name: Remove mod_wsgi source folder {{ mod_wsgi_source_path }}
+  become: yes
+  become_user: root
+  file:
+    path: "{{ mod_wsgi_source_path }}"
+    state: absent
+  when:
+    - mod_wsgi_source_exists.stat.exists == true
+
+# untar source tarball
+- name: untar mod_wsgi source tarball {{ mod_wsgi_source_tarball_path }}
+  unarchive:
+    src: "{{ mod_wsgi_source_tarball_path }}"
+    dest: "{{ mod_wsgi_work_path }}"
+    remote_src: yes
+
+# configure
+- name: run configure --with-python={{ mod_wsgi_python_bin_path }}
+  shell: "./configure --with-python={{ mod_wsgi_python_bin_path }}"
+  args:
+    chdir: "{{ mod_wsgi_source_path }}"
+
+# make
+- name: run make in source directory ({{ mod_wsgi_source_path }}).
+  shell: "LD_RUN_PATH={{ python_lib_folder_path }} make --directory={{ mod_wsgi_source_path }}"
+  args:
+    chdir: "{{ mod_wsgi_source_path }}"
+
+# stop apache
+- name: stop httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: stopped
+
+# make install
+- name: run make install in source directory ({{ mod_wsgi_source_path }}).
+  become: yes
+  become_user: root
+  shell: "make --directory={{ mod_wsgi_source_path }} install"
+  args:
+    chdir: "{{ mod_wsgi_source_path }}"
+
+#------------------------------------------------------------------------------#
+# add mod_wsgi to apache
+
+# place wsgi.conf in {{ httpd_conf_folder }}
+- name: place wsgi.conf in {{ httpd_conf_folder }}
+  become: yes
+  become_user: root
+  template:
+    src: wsgi.conf.j2
+    dest: "{{ wsgi_conf_file_path }}"
+  notify: restart httpd
+
+#------------------------------------------------------------------------------#
+# start apache
+
+# stop apache
+- name: start httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: started
