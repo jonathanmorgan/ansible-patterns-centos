@@ -1,6 +1,14 @@
 #------------------------------------------------------------------------------#
 # move aside any existing mod_wsgi.so and wsgi.conf
 
+# stop apache
+- name: stop httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: stopped
+
 # does mod_wsgi module already exist?
 - name: Ansible check if mod_wsgi module so file {{ mod_wsgi_so_path }} exists
   stat:
@@ -81,3 +89,11 @@
     state: absent
   when:
     - mod_wsgi_source_exists.stat.exists == true
+
+# start apache
+- name: start httpd
+  become: yes
+  become_user: root
+  service:
+    name: httpd
+    state: started

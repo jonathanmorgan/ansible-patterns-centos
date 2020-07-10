@@ -102,7 +102,7 @@
 #------------------------------------------------------------------------------#
 # start apache
 
-# stop apache
+# start apache
 - name: start httpd
   become: yes
   become_user: root
