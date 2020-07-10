@@ -22,6 +22,38 @@
 - name: Install Postgresql in conda environment
   shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && conda install postgresql --yes
 
+#------------------------------------------------------------------------------#
+# PostgreSQL home and data directories
+
+# Check if postgresql home directory exists.
+- name: Ansible check if directory {{ postgresql_home_path }} exists
+  stat:
+    path: "{{ postgresql_home_path }}"
+  register: postgresql_home_folder_exists
+
+# if not, create postgresql home
+- name: make sure there is a "{{ postgresql_home_path }}" folder
+  file:
+    path: "{{ postgresql_home_path }}"
+    state: directory
+  when: postgresql_home_folder_exists.stat.exists == false
+
+# create start and stop scripts
+
+# place start_pgsql.sh in {{ postgresql_home_path }}
+- name: place start_pgsql.sh in {{ postgresql_home_path }}
+  template:
+    src: start_pgsql.sh.j2
+    dest: "{{ postgresql_home_path }}/start_pgsql.sh"
+    mode: 0755
+
+# place wsgi.conf in {{ httpd_conf_folder }}
+- name: place stop_pgsql.sh in {{ postgresql_home_path }}
+  template:
+    src: stop_pgsql.sh.j2
+    dest: "{{ postgresql_home_path }}/stop_pgsql.sh"
+    mode: 0755
+
 # check if database directory already exists.
 - name: Ansible check if directory {{ postgresql_data_path }} exists
   stat:

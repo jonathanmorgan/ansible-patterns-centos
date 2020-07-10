@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# need conda env {{ postgresql_conda_env }} activated.
+
+# stop postgresql
+pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_home_path }}/logfile-$( date "+%Y%m%dT%H%M%S" ) stop
