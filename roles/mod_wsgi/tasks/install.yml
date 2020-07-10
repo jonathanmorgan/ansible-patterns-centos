@@ -67,6 +67,8 @@
   args:
     chdir: "{{ mod_wsgi_source_path }}"
 
+# More details on LD_RUN_PATH here: https://stackoverflow.com/questions/20913125/mod-wsgi-for-correct-version-of-python3
+
 # stop apache
 - name: stop httpd
   become: yes
@@ -94,6 +96,8 @@
     src: wsgi.conf.j2
     dest: "{{ wsgi_conf_file_path }}"
   notify: restart httpd
+
+# More details on needing WSGIPythonHome: https://groups.google.com/forum/#!topic/modwsgi/1oEuIHDiCbM
 
 #------------------------------------------------------------------------------#
 # start apache
