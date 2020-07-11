@@ -1,8 +1,8 @@
 # related variables
 ansible_user_home_folder: "/home/{{ ansible_user }}"
-anaconda_base_path: "/opt/miniconda3"
-anaconda_base_bin_path: "{{ anaconda_base_path }}/bin"
-anaconda_base_python: "{{ anaconda_base_bin_path }}/python3"
+python_base_path: "/opt/python3.8"
+python_base_bin_path: "{{ python_base_path }}/bin"
+python_base_python_executable: "{{ python_base_bin_path }}/python3.8"
 virtualenv_parent_folder: "{{ ansible_user_home_folder }}"
 virtualenv_folder: "{{ virtualenv_parent_folder }}/.virtualenvs"
 work_folder: "{{ ansible_user_home_folder }}/work"
@@ -13,9 +13,9 @@ server_webroot_folder: /var/www/html
 django_project_name: research
 
 # django project virtualenv
-django_virtualenv_from_env: "{{ anaconda_base_path }}"
-django_virtualenv_from_env_bin: "{{ anaconda_base_bin_path }}"
-django_virtualenv_from_env_python: "{{ anaconda_base_python }}"  # python where virtualenv and virtualenvwrapper are installed, used to create virtualenv.
+django_virtualenv_from_env: "{{ python_base_path }}"
+django_virtualenv_from_env_bin: "{{ python_base_bin_path }}"
+django_virtualenv_from_env_python: "{{ python_base_python_executable }}"  # python executable where virtualenv and virtualenvwrapper are installed, used to create virtualenv.
 django_virtualenv_home_path: "{{ virtualenv_folder }}"
 django_virtualenv_name: "{{ django_project_name }}"
 django_virtualenv_path: "{{ django_virtualenv_home_path }}/{{ django_virtualenv_name }}"
@@ -28,12 +28,13 @@ db_postgresql_port: "5432"
 db_postgresql_bin_path: "/home/jonathanmorgan/.conda/envs/postgresql_service/bin"  # leave empty if in standard path.
 db_mysql_python_package: "mysqlclient"
 db_mysql_port: "3306"
-django_db_engine_mysql: "django.db.backends.mysql"
-django_db_engine_postgresql: "django.db.backends.postgresql"
-django_db_engine_sqlite3: "django.db.backends.sqlite3"
+django_db_engine_prefix: "django.db.backends."
+django_db_engine_mysql: "{{ django_db_engine_prefix }}mysql"
+django_db_engine_postgresql: "{{ django_db_engine_prefix }}postgresql"
+django_db_engine_sqlite3: "{{ django_db_engine_prefix }}sqlite3"
 
 # django project database configuration - postgresql
-django_database_type: "postgresql"  # for now, supported: "mysql", "postgresql"
+django_database_type: "postgresql"  # for now, supported: "mysql", "postgresql", "sqlite3"
 django_db_python_package: "{{ db_postgresql_python_package }}"
 django_db_engine: "{{ django_db_engine_postgresql }}"
 django_db_port: "{{ db_postgresql_port }}"  # 5432 for postgresql, 3306 for mysql.

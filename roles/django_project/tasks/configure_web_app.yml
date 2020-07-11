@@ -92,4 +92,4 @@
 - name: Configure SELinux to allow httpd to access user files
   become: yes
   become_user: root
-  seboolean: name=httpd_enable_homedirs state=true persistent=yes
+  seboolean: name=httpd_read_user_content state=true persistent=yes
