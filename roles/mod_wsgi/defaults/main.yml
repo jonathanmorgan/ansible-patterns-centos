@@ -12,6 +12,8 @@ mod_wsgi_source_tarball_path: "{{ mod_wsgi_work_path }}/{{ mod_wsgi_version }}.t
 mod_wsgi_source_path: "{{ mod_wsgi_work_path }}/mod_wsgi-{{ mod_wsgi_version }}"
 httpd_modules_path: /usr/lib64/httpd/modules
 mod_wsgi_so_path: "{{ httpd_modules_path }}/mod_wsgi.so"
-httpd_conf_folder: /etc/httpd/conf.d
-wsgi_conf_file_name: wsgi.conf
-wsgi_conf_file_path: "{{ httpd_conf_folder }}/{{ wsgi_conf_file_name }}"
+httpd_conf_home: /etc/httpd
+httpd_conf_folder: "{{ httpd_conf_home }}/conf.d"
+httpd_mod_conf_folder: "{{ httpd_conf_home }}/conf.modules.d"
+wsgi_conf_file_name: 10-wsgi.conf
+wsgi_conf_file_path: "{{ httpd_mod_conf_folder }}/{{ wsgi_conf_file_name }}"

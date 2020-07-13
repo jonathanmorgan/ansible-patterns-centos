@@ -88,8 +88,8 @@
 #------------------------------------------------------------------------------#
 # add mod_wsgi to apache
 
-# place wsgi.conf in {{ httpd_conf_folder }}
-- name: place wsgi.conf in {{ httpd_conf_folder }}
+# place mod_wsgi conf in {{ wsgi_conf_file_path }}
+- name: place mod_wsgi conf in {{ wsgi_conf_file_path }}
   become: yes
   become_user: root
   template:
