@@ -76,15 +76,16 @@
   when:
     - server_centos_package_manager == "yum"
   tags: mysql
-  
-# enable mysql
-- name: enable mysql
+
+# install mysql-python package if not already installed.
+- name: install mysql-python in python 2
   become: yes
   become_user: root
-  service:
-    name: mysqld
-    state: restarted
-    enabled: yes
+  pip:
+    executable: "{{ python_2_pip_executable }}"
+    name:
+      - mysql-python
+    state: latest
 
 # install python libraries for MySQL in python 3.
 - name: install python libraries for MySQL
@@ -96,6 +97,15 @@
       - mysqlclient
       - PyMySQL
   tags: mysql
+
+# enable mysql
+- name: enable mysql
+  become: yes
+  become_user: root
+  service:
+    name: mysqld
+    state: restarted
+    enabled: yes
 
 # set to listen on defined bind-address - MySQL
 - name: Set bind-address to {{ server_mysql_bind_address }} for MySQL
@@ -118,7 +128,7 @@
 # ==> secure database - equivalent to `mysql_secure_installation` script
 - name: run mysql_secure_installation ansible module
   mysql_secure_installation:
-    login_password: ''
+    login_password: '{{ server_mysql_temp_root_password }}'
     new_password: "{{ server_mysql_root_password }}"
     user: root
     login_host: localhost

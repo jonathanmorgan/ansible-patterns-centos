@@ -24,45 +24,36 @@
 
 - name: make {{ project_name }} home
   file:
-    path: "/home/{{ ansible_user }}/work/{{ project_name }}"
+    path: "{{ project_home_folder_path }}"
     state: directory
 
 - name: make sure there is a django folder in {{ project_name }} home
   file:
-    path: "/home/{{ ansible_user }}/work/{{ project_name }}/django"
+    path: "{{ project_django_folder_path }}"
     state: directory
 
 - name: make sure there is a django/logs folder in {{ project_name }} home
   file:
-    path: "/home/{{ ansible_user }}/work/{{ project_name }}/django/logs"
+    path: "{{ project_django_logs_folder_path }}"
     state: directory
+
+- name: make sure there is a django/logs/{{ project_name }}-dev.log file, permissions 777.
+  file:
+    path: "{{ project_django_logs_folder_path }}/{{ project_name }}-dev.log"
+    state: touch
+    mode: '1777'
 
 - name: make sure there is a backups folder in {{ project_name }} home
   file:
-    path: "/home/{{ ansible_user }}/work/{{ project_name }}/backups"
+    path: "{{ project_backup_folder_path }}"
     state: directory
 
-# use git to retrieve (might have to just do this manually):
+#------------------------------------------------------------------------------#
+# cvnc git repo cloning
+#------------------------------------------------------------------------------#
 
-# - webroot repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/webroot.git
-- name: clone webroot
-  git:
-    repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/webroot.git
-    dest: "/home/{{ ansible_user }}/work/{{ project_name }}/webroot"
-  when: do_git == true
-
-# - django repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/django-apps.git
-- name: clone django repo
-  git:
-    repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/django-apps.git
-    dest: "/home/{{ ansible_user }}/work/{{ project_name }}/django/django-apps"
-  when: do_git == true
-
-# - cf-components repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/cf-components.git
-- name: clone cf-components repo
-  git:
-    repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/cf-components.git
-    dest: "/home/{{ ansible_user }}/work/{{ project_name }}/webroot/cf-components"
+- name: git repo cloning
+  include: git.yml
   when: do_git == true
 
 #------------------------------------------------------------------------------#
@@ -75,75 +66,16 @@
 #     - db_dump_file_name
 #     - do_db: true
 
-# create cvnc database
-- name: Create database with name '{{ db_name }}''
-  mysql_db:
-    login_user: root
-    login_password: "{{ server_mysql_root_password }}"
-    name: "{{ db_name }}"
-    state: present
-  when: do_db == true
-
-# check if {{ db_user_name }} MySQL user created.
-- name: check if user {{ db_user_name }} exists
-  shell: mysql -u root -p{{ server_mysql_root_password }} -e 'SELECT DISTINCT User FROM mysql.user;' | grep {{ db_user_name }}
-  register: mysql_user_exists_check
-  failed_when: mysql_user_exists_check.rc == 2
-  when: do_db == true
-
-# To see detailed output
-- debug:
-    var: mysql_user_exists_check
-  when: do_db == true
-
-# create {{ db_user_name }} mysql user
-- name: Create MySQL user {{ db_user_name }}
-  become: yes
-  become_user: root
-  mysql_user:
-    login_user: root
-    login_password: "{{ server_mysql_root_password }}"
-    name: "{{ db_user_name }}"
-    password: "{{ db_password }}"
-    host: "{{ item }}"
-    priv: 'cvnc.*:ALL'
-    state: present
-  with_items:
-    - ::1
-    - 127.0.0.1
-    - "localhost"
-  when:
-    - do_db == true
-    - mysql_user_exists_check.rc == 1
-    - mysql_user_exists_check.stdout == ""
-  notify: restart mysql
-  tags: mysql
-
-# import database
-- name: Import database data.
-  mysql_db:
-    login_user: "{{ db_user_name }}"
-    login_password: "{{ db_password }}"
-    name: cvnc
-    state: import
-    target: /home/{{ ansible_user }}/work/{{ project_name }}/backups/{{ db_dump_file_name }}
+- name: database setup include
+  include: database.yml
   when: do_db == true
 
 #------------------------------------------------------------------------------#
 # python
 #------------------------------------------------------------------------------#
 
-# MANUAL - install miniconda 3 using the "miniconda3" role, then come back.
+- name: python setup include
+  include: python.yml
+  when: do_python == true
 
-#------------------------------------------------------------------------------#
-# based on python and django notes: https://docs.google.com/document/d/1ebH1QiV_9vxNhAT1YvVyuTRAgzc6tD1N9g2lklTIQl0/edit?usp=sharing)
-
-
-#------------------------------------------------------------------------------#
-# configure apache
-#------------------------------------------------------------------------------#
-
-
-#------------------------------------------------------------------------------#
-# mod wsgi?
-#------------------------------------------------------------------------------#
+# virtual host for apache

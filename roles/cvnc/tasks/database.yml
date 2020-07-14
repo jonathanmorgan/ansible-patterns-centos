@@ -1,0 +1,63 @@
+#------------------------------------------------------------------------------#
+# cvnc mysql setup
+#------------------------------------------------------------------------------#
+
+# MANUAL
+# - download database backup to ~/backups and gunzip.
+# - update defaults/main.yml:
+#     - db_dump_file_name
+#     - do_db: true
+
+# create cvnc database
+- name: Create database with name '{{ db_name }}''
+  mysql_db:
+    login_user: root
+    login_password: "{{ server_mysql_root_password }}"
+    name: "{{ db_name }}"
+    state: present
+  when: do_db == true
+
+# check if {{ db_user_name }} MySQL user created.
+- name: check if user {{ db_user_name }} exists
+  shell: mysql -u root -p{{ server_mysql_root_password }} -e 'SELECT DISTINCT User FROM mysql.user;' | grep {{ db_user_name }}
+  register: mysql_user_exists_check
+  failed_when: mysql_user_exists_check.rc == 2
+  when: do_db == true
+
+# To see detailed output
+- debug:
+    var: mysql_user_exists_check
+  when: do_db == true
+
+# create {{ db_user_name }} mysql user
+- name: Create MySQL user {{ db_user_name }}
+  become: yes
+  become_user: root
+  mysql_user:
+    login_user: root
+    login_password: "{{ server_mysql_root_password }}"
+    name: "{{ db_user_name }}"
+    password: "{{ db_password }}"
+    host: "{{ item }}"
+    priv: 'cvnc.*:ALL'
+    state: present
+  with_items:
+    - ::1
+    - 127.0.0.1
+    - "localhost"
+  when:
+    - do_db == true
+    - mysql_user_exists_check.rc == 1
+    - mysql_user_exists_check.stdout == ""
+  notify: restart mysql
+  tags: mysql
+
+# import database
+- name: Import database data.
+  mysql_db:
+    login_user: "{{ db_user_name }}"
+    login_password: "{{ db_password }}"
+    name: cvnc
+    state: import
+    target: "{{ project_backup_folder_path }}/{{ db_dump_file_name }}"
+  when: do_db == true

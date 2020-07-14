@@ -1,0 +1,10 @@
+# server mysql type can be "mariadb" or "mysql"
+server_mysql_type: "mysql"
+
+# MySQL configuration
+server_mysql_bind_address: "::"
+server_mysql_temp_root_password: ""
+server_mysql_root_password: "Today-123"
+server_mysql_admin_user: "{{ ansible_user }}"
+server_mysql_admin_password: "{{ server_mysql_root_password }}"
+server_mysql_version: "57" # or "80"

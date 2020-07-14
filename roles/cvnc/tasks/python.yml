@@ -1,0 +1,51 @@
+#------------------------------------------------------------------------------#
+# python
+#------------------------------------------------------------------------------#
+
+# check if virtualenv for django application exists
+- name: check if virtualenv {{ project_virtualenv_name }} exists
+  shell: ls -al {{ virtualenvs_folder }} | grep {{ project_virtualenv_name }}
+  register: virtualenv_exists_check
+  failed_when: virtualenv_exists_check.rc == 2
+  when: do_python == true
+
+  # create virtualenv for django application
+- name: create virtualenv for django project
+  shell: "{{ virtualenv_command }} --python={{ virtualenv_python }} {{ project_virtualenv_home }}"
+  when:
+    - do_python == true
+    - virtualenv_exists_check.rc == 1
+    - virtualenv_exists_check.stdout == ""
+
+# install packages from requirements.txt
+- name: install project requirements
+  pip:
+    requirements: "{{ project_django_project_home }}/requirements.txt"
+    virtualenv: "{{ project_virtualenv_home }}"
+  notify: touch wsgi.py
+  when: do_python == true
+
+# replace wsgi.py
+- name: put wsgi.py in place
+  template:
+    src: wsgi.py.j2
+    dest: '{{ project_django_project_home }}/{{ project_django_project_name }}/wsgi.py'
+  when: do_python == true
+
+# replace settings.py
+- name: put settings.py in place
+  template:
+    src: settings.py.j2
+    dest: '{{ project_django_project_home }}/{{ project_django_project_name }}/settings.py'
+  notify: touch wsgi.py
+  when: do_python == true
+
+# add apache conf file to /etc/httpd/conf.d
+- name: add django app to apache conf.
+  become: yes
+  become_user: root
+  template:
+    src: django-project.conf.j2
+    dest: '/etc/httpd/conf.d/django-{{ project_django_project_name }}.conf'
+  notify: restart httpd
+  when: do_python == true

@@ -46,6 +46,7 @@
   pip:
     virtualenv: "{{ django_virtualenv_path }}"
     name:
+      - pip
       - django
       - "{{ django_db_python_package }}"
       - ipython

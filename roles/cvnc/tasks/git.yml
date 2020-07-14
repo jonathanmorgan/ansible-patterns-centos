@@ -1,0 +1,22 @@
+# use git to retrieve (might have to just do this manually):
+
+# - webroot repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/webroot.git
+- name: clone webroot
+  git:
+    repo: ssh://{{ cvnc_git_user }}@{{ project_host_url }}/home/cvnc/git/webroot.git
+    dest: "{{ project_webroot_home }}"
+  when: do_git == true
+
+# - django repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/django-apps.git
+- name: clone django repo
+  git:
+    repo: ssh://{{ cvnc_git_user }}@{{ project_host_url }}/home/cvnc/git/django-apps.git
+    dest: "{{ project_django-apps_home }}"
+  when: do_git == true
+
+# - cf-components repo: ssh://project_host_username@{{ project_host_url }}/home/cvnc/git/cf-components.git
+- name: clone cf-components repo
+  git:
+    repo: ssh://{{ cvnc_git_user }}@{{ project_host_url }}/home/cvnc/git/cf-components.git
+    dest: "{{ project_cf_components_home }}"
+  when: do_git == true

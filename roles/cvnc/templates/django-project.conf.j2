@@ -1,0 +1,22 @@
+WSGIApplicationGroup %{GLOBAL}
+WSGIDaemonProcess {{ project_name }}-1 threads=10 display-name=%{GROUP} python-home={{ project_virtualenv_home }} python-path={{ project_django_project_home }} 
+
+# set python path as part of WSGIDaemonProcess -->
+# WSGIDaemonProcess {{ project_name }}-1 ... python-path=
+# - no virtualenv:
+#     ... python-path={{ project_django_project_home }}
+# - virtualenv, place the root of the virtualenv in a separate python-home property:
+#     ... python-home={{ project_virtualenv_home }} python-path={{ project_django_project_home }}
+
+WSGIProcessGroup {{ project_name }}-1
+WSGIScriptAlias /{{ project_name }} {{ project_django_project_home }}/{{ project_name }}/wsgi.py process-group={{ project_name }}-1
+        
+<Directory {{ project_django_project_home }}/{{ project_name }}>
+    <Files wsgi.py>
+        # apache 2.4:
+        Require all granted
+        # apache 2.2 or earlier:
+        #Order deny,allow
+        #Allow from all
+    </Files>
+</Directory>

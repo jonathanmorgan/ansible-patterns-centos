@@ -1,15 +1,47 @@
+# shared
+ansible_user_home_folder: "/home/{{ ansible_user }}"
+django_virtualenv_python_version: "3.6"
+
 # project_name
 project_name: cvnc
 project_host_username: cvnc
 project_host_url: 205.145.140.65
 
+# directories
+project_home_folder_path: "{{ ansible_user_home_folder }}/work/{{ project_name }}"
+project_django_folder_path: "{{ project_home_folder_path }}/django"
+project_django_logs_folder_path: "{{ project_django_folder_path }}/logs"
+project_backup_folder_path: "{{ project_home_folder_path }}/backups"
+project_webroot_home: "{{ project_home_folder_path }}/webroot"
+project_django_apps_home: "{{ project_django_folder_path }}/django-apps"
+project_cf_components_home: "{{ project_webroot_home }}/cf-components"
+
 # git repos
 do_git: false
-git_user: 
+cvnc_git_user: "{{ project_host_username }}"
 
 # database
 do_db: false
-db_name: cvnc
-db_user_name: cvnc
-db_password: today123
-db_dump_file_name: cvnc_2020-06-19_02h00m.Friday.sql
+db_name: "{{ project_name }}"
+db_user_name: "{{ project_name }}"
+db_password: Today-123
+db_dump_file_name: cvnc_2020-07-13_02h00m.Monday.sql
+
+# python
+do_python: true
+virtualenvs_parent_folder: "{{ ansible_user_home_folder }}"
+virtualenvs_folder: "{{ virtualenv_parent_folder }}/.virtualenvs"
+virtualenv_python: "/opt/rh/rh-python36/root/usr/bin/python"
+virtualenv_command: "/opt/rh/rh-python36/root/usr/bin/virtualenv"
+project_virtualenv_name: "{{ project_name }}"
+project_virtualenv_home: "{{ virtualenvs_folder }}/{{ project_virtualenv_name }}"
+project_django_project_name: "{{ project_name }}"
+project_django_project_home: "{{ project_django_apps_home }}/{{ project_django_project_name }}"
+django_project_folder_path: "{{ project_django_project_home }}"
+django_project_name: "{{ project_django_project_name }}"
+
+# django settings
+django_allowed_hosts: "'localhost', 'nieonline.local', 'cvnc.local', '127.0.0.1'"
+django_media_root: "{{ project_webroot_home }}/public_html/media"
+django_static_root: "{{ project_webroot_home }}/public_html/static"
+django_static_url: "/static/"

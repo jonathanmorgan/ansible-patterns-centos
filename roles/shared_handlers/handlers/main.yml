@@ -31,3 +31,17 @@
   become: yes
   become_user: root
   shell: firewall-cmd --reload
+
+# restart mysqld
+- name: restart mysql
+  become: yes
+  become_user: root
+  service:
+    name: mysqld
+    state: restarted
+
+# touch wsgi.py to reload mod_wsgi.
+- name: touch wsgi.py
+  file:
+    path: "{{ django_project_folder_path }}/{{ django_project_name }}/wsgi.py"
+    state: touch

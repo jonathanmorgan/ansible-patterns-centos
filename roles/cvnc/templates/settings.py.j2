@@ -1,0 +1,213 @@
+# Django settings for cvnc project.
+
+import logging
+
+logging.basicConfig(
+    level = logging.ERROR,
+    format = '%(asctime)s %(levelname)s %(message)s',
+    filename = '{{ project_django_logs_folder_path }}/cvnc-dev.log',
+    filemode = 'w'
+)
+
+DEBUG = True
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+# new setting as of 1.4.4, to defend against cross-site scripting exploits.
+ALLOWED_HOSTS = [ {{ django_allowed_hosts }} ]
+
+SECURE_SSL_REDIRECT = True
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '{{ db_name }}',                      # Or path to database file if using sqlite3.
+        'USER': '{{ db_user_name }}',                      # Not used with sqlite3.
+        'PASSWORD': '{{ db_password }}',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+TIME_ZONE = 'America/Detroit'
+
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en-us'
+
+SITE_ID = 1
+
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+USE_I18N = True
+
+# If you set this to False, Django will not format dates, numbers and
+# calendars according to the current locale
+USE_L10N = True
+
+# Absolute path to the directory that holds media.
+# Example: "/home/media/media.lawrence.com/"
+MEDIA_ROOT = '{{ django_media_root }}'
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash if there is a path component (optional in other cases).
+# Examples: "http://media.lawrence.com", "http://example.com/media/"
+MEDIA_URL = 'http://cvnc.org/media/'
+
+# Absolute path to the directory that holds static files.
+# Example: "/home/media/media.lawrence.com/"
+STATIC_ROOT = '{{ django_static_root }}'
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash if there is a path component (optional in other cases).
+# Examples: "http://media.lawrence.com", "http://example.com/media/"
+STATIC_URL = '{{ django_static_url }}'
+
+# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
+# trailing slash.
+# Examples: "http://foo.com/media/", "/media/".
+ADMIN_MEDIA_PREFIX = '/media/'
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = '5zfewt-7e=u5_*$v=@a)@hioxv$4tc@*(1pewqod&)s$o3*4d0'
+
+#MIDDLEWARE_CLASSES = (
+#    'django.middleware.common.CommonMiddleware',
+#    'django.contrib.sessions.middleware.SessionMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',
+#    'django.contrib.auth.middleware.AuthenticationMiddleware',
+#    'django.contrib.messages.middleware.MessageMiddleware',
+#)
+MIDDLEWARE = [
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+]
+
+ROOT_URLCONF = 'cvnc.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        #'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+            'loaders' : [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                #'django.template.loaders.eggs.Loader',
+            ],
+            'debug' : DEBUG,
+        },
+    },
+]
+
+'''
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+)
+
+TEMPLATES = (
+    'django.contrib.auth.context_processors.auth',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.static',
+    'django.core.context_processors.media',
+)
+'''
+
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # Uncomment the next line to enable the admin:
+    'django.contrib.admin',
+    'events.apps.EventsConfig',
+    'adverts.apps.AdvertsConfig',
+    'email_newsletter.apps.Email_NewsletterConfig',
+    'photologue',
+    #'tagging',
+    #'ajax_select',
+    'report_builder',
+    'django_config',
+    'ckeditor',
+)
+
+# path to private directory where files we don't want on the internet can be uploaded, stored.
+PRIVATE_UPLOAD_DIRECTORY = '/home/cvnc/private_uploads/cvnc'
+'''
+AJAX_LOOKUP_CHANNELS = {
+    # the simplest case, pass a DICT with the model and field to search against :
+    #'track' : dict(model='music.track',search_field='title'),
+    # this generates a simple channel
+    # specifying the model Track in the music app, and searching against the 'title' field
+
+    # or write a custom search channel and specify that using a TUPLE
+    'article' : ('events.ajax-select-lookups', 'ArticleLookup'),
+    'contributor' : ('events.ajax-select-lookups', 'ContributorLookup'),
+    'event' : ('events.ajax-select-lookups', 'EventLookup'),
+    'image' : ( 'events.ajax-select-lookups', 'ImageLookup' ),
+    'location' : ('events.ajax-select-lookups', 'LocationLookup'),
+    'presenter' : ('events.ajax-select-lookups', 'PresenterLookup'),
+    'series' : ('events.ajax-select-lookups', 'SeriesLookup'),
+    'user' : ('events.ajax-select-lookups', 'UserLookup'),
+    # this specifies to look for the class `LocationLookup` in the `cvnc.events.ajax-select-lookups` module
+}
+'''
+
+# magically include jqueryUI/js/css
+#AJAX_SELECT_BOOTSTRAP = True
+#AJAX_SELECT_INLINES = 'inline'
+FILE_UPLOAD_PERMISSIONS = 0o755
+
+# django-report-builder
+REPORT_BUILDER_ASYNC_REPORT = False
+
+# django-ckeditor
+CKEDITOR_JQUERY_URL = '//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js'
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar' : 'Custom',
+        'toolbar_Custom' : [
+            [ 'Maximize' ],
+            [ 'Bold', 'Italic', 'Strike', 'RemoveFormat' ],
+            [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ],
+            [ 'Link', 'Unlink', 'Anchor' ],
+            [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord' ],
+            [ 'Undo', 'Redo' ],
+            [ 'Source'],
+        ],
+        'bodyClass' : 'vLargeTextField',
+        'entities' : False,
+        'entities_greek' : False,
+        'entities_latin' : False,
+        'allowedContent' : True, # turned off HTML filtering (was stripping out <a> tags).
+    }
+}
