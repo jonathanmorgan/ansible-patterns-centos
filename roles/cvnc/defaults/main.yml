@@ -28,7 +28,7 @@ db_password: Today-123
 db_dump_file_name: cvnc_2020-07-13_02h00m.Monday.sql
 
 # python
-do_python: true
+do_python: false
 virtualenvs_parent_folder: "{{ ansible_user_home_folder }}"
 virtualenvs_folder: "{{ virtualenv_parent_folder }}/.virtualenvs"
 virtualenv_python: "/opt/rh/rh-python36/root/usr/bin/python"
@@ -45,3 +45,8 @@ django_allowed_hosts: "'localhost', 'nieonline.local', 'cvnc.local', '127.0.0.1'
 django_media_root: "{{ project_webroot_home }}/public_html/media"
 django_static_root: "{{ project_webroot_home }}/public_html/static"
 django_static_url: "/static/"
+
+# coldfusion and apache settings
+do_coldfusion: true
+cf_apache_admin_email: "<setme>"
+project_apache_log_folder: "{{ project_django_logs_folder_path }}/httpd"

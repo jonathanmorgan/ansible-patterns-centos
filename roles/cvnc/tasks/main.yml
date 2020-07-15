@@ -78,4 +78,11 @@
   include: python.yml
   when: do_python == true
 
-# virtual host for apache
+#------------------------------------------------------------------------------#
+# post-install coldfusion tasks, including virtual host for apache
+#------------------------------------------------------------------------------#
+
+- name: post-install coldfusion tasks.
+  include: coldfusion.yml
+  when: do_coldfusion == true
+  

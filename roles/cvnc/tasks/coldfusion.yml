@@ -1,0 +1,32 @@
+# ColdFusion setup:
+# - https://docs.google.com/document/d/1E2yhtMy4pVwlMzc_vDMUE6JAtk1uXPn12Ch7XAlfPKc/edit#heading=h.bdgmo2r33fbq
+
+# install update manually.
+
+# install mysql connector/j in coldfusion:
+#The standalone MySQL JDBC driver is no longer shipped with ColdFusion.
+#Please download it, put it in cf_root/lib folder and restart ColdFusion.
+#connector/j
+#https://dev.mysql.com/downloads/connector/j/5.1.html
+#Un-tar and uncompress
+#tar -xvzf mysql-connector-java-5.1.49.tar.gz
+#Cd into folder:
+#cd mysql-connector-java-5.1.49
+#Copy JAR into cf_root/lib… /opt/coldfusion2018/cfusion/lib
+#sudo cp mysql-connector-java-5.1.49.jar /opt/coldfusion2018/cfusion/lib
+
+# make sure there is a log folder {{ project_apache_log_folder }}
+- name: make sure there is a log folder {{ project_apache_log_folder }}
+  file:
+    path: "{{ project_apache_log_folder }}"
+    state: directory
+
+# put virtual_host conf in place
+- name: put virtual_host conf in place
+  become: yes
+  become_user: root
+  template:
+    src: project-virtual-host.conf.j2
+    dest: '/etc/httpd/conf.d/{{ project_django_project_name }}-virtual_host.conf'
+  notify: restart httpd
+  when: do_coldfusion == true
