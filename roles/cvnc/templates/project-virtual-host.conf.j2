@@ -9,16 +9,24 @@
 	<Directory {{ project_webroot_home }}/public_html>
 		Options Indexes FollowSymLinks MultiViews
 		AllowOverride None
-		Order allow,deny
-		allow from all
+	    
+		# apache 2.4:
+		Require all granted
+		# apache 2.2 or earlier:
+		#Order deny,allow
+		#Allow from all
 	</Directory>
 
 	ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
 	<Directory "/usr/lib/cgi-bin">
 		AllowOverride None
 		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
-		Order allow,deny
-		Allow from all
+
+		# apache 2.4:
+		Require all granted
+		# apache 2.2 or earlier:
+		#Order deny,allow
+		#Allow from all
 	</Directory>
 
 	ErrorLog {{ project_apache_log_folder }}/error.log
@@ -29,14 +37,19 @@
 
 	CustomLog {{ project_apache_log_folder }}/access.log combined
 
-    Alias /doc/ "/usr/share/doc/"
-    <Directory "/usr/share/doc/">
-        Options Indexes MultiViews FollowSymLinks
-        AllowOverride None
-        Order deny,allow
-        Deny from all
-        Allow from 127.0.0.0/255.0.0.0 ::1/128
-    </Directory>
+	Alias /doc/ "/usr/share/doc/"
+	<Directory "/usr/share/doc/">
+		Options Indexes MultiViews FollowSymLinks
+		AllowOverride None
+
+		# apache 2.4:
+		Require all granted
+		# apache 2.2 or earlier:
+		#Order deny,allow
+		#Allow from all
+
+		Allow from 127.0.0.0/255.0.0.0 ::1/128
+	</Directory>
 
 
 	# Define CFIDE within this virtual host.  Make sure the symbolic link "/var/www/CFIDE" points to the right IDE for the current version of ColdFusion:

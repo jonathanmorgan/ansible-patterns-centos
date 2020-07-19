@@ -30,3 +30,7 @@
     dest: '/etc/httpd/conf.d/{{ project_django_project_name }}-virtual_host.conf'
   notify: restart httpd
   when: do_coldfusion == true
+
+# Need to enable the port for tomcat in SELINUX?
+# https://stackoverflow.com/questions/58365989/coldfusion-2018-on-centos-7-failing-to-setup-apache-connector
+# semanage port -a -t http_port_t -p tcp 8018
