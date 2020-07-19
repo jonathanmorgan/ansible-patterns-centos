@@ -23,7 +23,7 @@
   shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && conda install postgresql --yes
 
 #------------------------------------------------------------------------------#
-# PostgreSQL home and data directories
+# PostgreSQL home, data and log directories
 
 # Check if postgresql home directory exists.
 - name: Ansible check if directory {{ postgresql_home_path }} exists
@@ -47,12 +47,24 @@
     dest: "{{ postgresql_home_path }}/start_pgsql.sh"
     mode: 0755
 
-# place wsgi.conf in {{ httpd_conf_folder }}
+# place stop_pgsql.sh in in {{ httpd_conf_folder }}
 - name: place stop_pgsql.sh in {{ postgresql_home_path }}
   template:
     src: stop_pgsql.sh.j2
     dest: "{{ postgresql_home_path }}/stop_pgsql.sh"
     mode: 0755
+
+# check if log directory already exists.
+- name: Ansible check if directory {{ postgresql_log_path }} exists
+  stat:
+    path: "{{ postgresql_log_path }}"
+  register: postgresql_log_folder_exists
+
+# create directory to hold logs
+- name: make sure there is a "{{ postgresql_log_path }}" folder
+  file:
+    path: "{{ postgresql_log_path }}"
+    state: directory
 
 # check if database directory already exists.
 - name: Ansible check if directory {{ postgresql_data_path }} exists
@@ -77,7 +89,7 @@
 
 # start database in {{ postgresql_data_path }}
 - name: start database in {{ postgresql_data_path }}
-  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_home_path }}/logfile-{{ ansible_date_time.iso8601_basic_short }} start
+  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_log_path }}/logfile-{{ ansible_date_time.iso8601_basic_short }} start
 
 # set to listen on defined listen_addresses.
 - name: Set listen_addresses for postgresql
