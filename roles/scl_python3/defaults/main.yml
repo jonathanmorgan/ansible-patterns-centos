@@ -1,0 +1,3 @@
+# separate python 3 via SCL (https://www.softwarecollections.org/en/)
+scl_python_version: "36" # "36" for 3.6, "35" for 3.5, etc.
+scl_wsgi_conf_file_path: /etc/httpd/conf.modules.d/10-wsgi-rh_python{{ scl_python_version }}.conf

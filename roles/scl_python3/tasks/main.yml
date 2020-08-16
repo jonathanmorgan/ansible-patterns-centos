@@ -1,0 +1,81 @@
+---
+# This playbook will install python and mod_wsgi from SCL.
+# - based on:
+#     - https://stackoverflow.com/questions/42004986/how-to-install-mod-wgsi-for-apache-2-4-with-python3-5-on-centos-7
+#     - https://phoenixnap.com/kb/how-to-install-python-3-centos-7
+#     - https://computingforgeeks.com/deploy-python-3-django-application-on-centos-with-apache-and-mod-wsgi/
+
+# install SCL - yum
+- name: install centos-release-scl (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - centos-release-scl
+  when: server_centos_version == "7"
+
+# install SCL - dnf
+- name: install centos-release-scl (dnf)
+   become: yes
+  become_user: root
+  dnf:
+    name:
+      - centos-release-scl
+  when: server_centos_version == "8"
+
+# Install Python 3 and mod_wsgi - yum
+- name: Install Python 3 and mod_wsgi (yum)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - rh-python{{ scl_python_version }}
+      - python{{ scl_python_version }}-devel
+      - httpd-devel
+      - rh-python{{ scl_python_version }}-mod_wsgi
+  when: server_centos_version == "7"
+
+# Install Python 3 and mod_wsgi - dnf
+- name: Install Python 3 and mod_wsgi (dnf)
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - rh-python{{ scl_python_version }}
+      - python{{ scl_python_version }}-devel
+      - httpd-devel
+      - rh-python{{ scl_python_version }}-mod_wsgi
+  when: server_centos_version == "8"
+
+#------------------------------------------------------------------------------#
+# add mod_wsgi to apache
+# - could also try symbolic links, but I didn't want to mess with it.
+
+# copy mod_wsgi so file to {{ scl_wsgi_conf_file_path }}
+- name: copy mod_wsgi .so file to /lib64/httpd/modules/mod_rh-python{{ scl_python_version }}-wsgi.so
+  become: yes
+  become_user: root
+  copy:
+    remote_src: true
+    src: /opt/rh/httpd24/root/usr/lib64/httpd/modules/mod_rh-python{{ scl_python_version }}-wsgi.so
+    dest: /lib64/httpd/modules/mod_rh-python{{ scl_python_version }}-wsgi.so
+  notify: restart httpd
+
+# copy mod_wsgi conf to {{ scl_wsgi_conf_file_path }}
+- name: copy mod_wsgi conf to {{ scl_wsgi_conf_file_path }}
+  become: yes
+  become_user: root
+  copy:
+    remote_src: true
+    src: /opt/rh/httpd24/root/etc/httpd/conf.modules.d/10-rh-python{{ scl_python_version }}-wsgi.conf
+    dest: /etc/httpd/conf.modules.d/10-rh-python{{ scl_python_version }}-wsgi.conf
+  notify: restart httpd
+
+# place mod_wsgi conf in {{ scl_wsgi_conf_file_path }}
+#- name: place mod_wsgi conf in {{ scl_wsgi_conf_file_path }}
+#  become: yes
+#  become_user: root
+#  template:
+#    src: 10-wsgi-rh_python36.conf.j2
+#    dest: "{{ scl_wsgi_conf_file_path }}"
+#  notify: restart httpd
