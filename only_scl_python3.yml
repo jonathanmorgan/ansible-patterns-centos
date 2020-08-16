@@ -1,0 +1,7 @@
+---
+# This playbook just installs an isolated Python 3 environment on the server from SCL, plus mod_wsgi.
+
+- name: set up isolated python environment on server
+  hosts: scl_python3_servers
+  roles:
+    - scl_python3
