@@ -35,10 +35,25 @@
     - `127.0.0.1 localhost.localdomain localhost research`
     - NOTE: if your hostname (run `hostname` to see what it is) isn’t a for-real DNS name, if you don’t update `/etc/hosts` to include your server name (example: “research”) in your set of DNS names for 127.0.0.1, sudo will be SLOW: https://ubuntuforums.org/showthread.php?t=1155261
 
-- And, a random note: If you are installing on a local VM where you'll assign an IP address (I ran into it in VMWare Fusion), but have no DNS name, but you want to make a DNS name by adding it to `/etc/hosts` on your host computer, don't put underscores in the host name you make up.  Far as I can tell, Apache 2.4 will not accept requests to the hostname with underscores in it, but will accept requests to the IP address of the VM, and will accept requests to hostnames with no underscores.  There might be a way to get this to work, but I do not know it. So, for example:
+- And, a couple of random notes:
 
-    - GOOD: `ubuntu.local`
-    - BAD: `ubuntu_server_lts.local`
+   - If you are installing on a local VM where you'll assign an IP address (I ran into it in VMWare Fusion), but have no DNS name, but you want to make a DNS name by adding it to `/etc/hosts` on your host computer, don't put underscores in the host name you make up.  Far as I can tell, Apache 2.4 will not accept requests to the hostname with underscores in it, but will accept requests to the IP address of the VM, and will accept requests to hostnames with no underscores.  There might be a way to get this to work, but I do not know it. So, for example:
+
+        - GOOD: `ubuntu.local`
+        - BAD: `ubuntu_server_lts.local`
+
+    - If you are on CentOS 7 (or probably 8, or any of them), and you have strange permission problems with wsgi.py, or with writing to your logging file, or with accessing anything at all in a user's home folder, etc., try turning selinux off to see if that is the problem:
+
+        - See SELINUX status: sestatus
+        - Disable SELINUX for the current runtime session: sudo setenforce 0
+        - Permanently disable SELINUX:
+
+            - Edit /etc/selinux/config.
+            - Set the SELINUX mod to "permissive" (controls in place, logs errors) or "disabled" (turns off selinux). Example line:
+                - `SELINUX=permissive`
+            - Reboot.
+
+        - If turning off selinux fixes your problems, then you can either just leave it off (you've got the firewall turned on right...?) or adjust things so that you either configure to allow the accesses your web application needs, or update installation so your web apps components are not in protected places.
 
 # `research` patterns
 
