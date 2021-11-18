@@ -53,6 +53,8 @@
                 - `SELINUX=permissive`
             - Reboot.
 
+        - If turning off selinux fixes your problems, then you can either just leave it off (you've got the firewall turned on right...?) or adjust things so that you either configure to allow the accesses your web application needs, or update installation so your web apps components are not in protected places.
+
 # `research` patterns
 
 Research server playbook is `research.yml`.
