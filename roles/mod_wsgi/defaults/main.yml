@@ -1,13 +1,15 @@
 # install mod_wsgi
 mod_wsgi_action: "install"  # "clean" to just remove, "install" to "clean", then build and install.
 mod_wsgi_version: 4.7.1
-#python_home_path: /opt/miniconda3
-python_home_path: /opt/python3.8
+miniconda_python_version: "3.9"
+python_home_path: /opt/miniconda3
+#python_home_path: /opt/python3.8
 python_bin_folder_path: "{{ python_home_path }}/bin"
 python_lib_folder_path: "{{ python_home_path }}/lib"
-python_executable_path: "{{ python_bin_folder_path }}/python3.8"
+python_executable_path: "{{ python_bin_folder_path }}/python{{ miniconda_python_version }}"
 mod_wsgi_python_bin_path: "{{ python_executable_path }}"
-mod_wsgi_work_path: "{{ ansible_user_home_folder }}/Downloads/mod_wsgi/{{ mod_wsgi_version }}"
+mod_wsgi_base_path: "{{ ansible_user_home_folder }}/Downloads/mod_wsgi"
+mod_wsgi_work_path: "{{ mod_wsgi_base_path }}/{{ mod_wsgi_version }}"
 mod_wsgi_source_tarball_path: "{{ mod_wsgi_work_path }}/{{ mod_wsgi_version }}.tar.gz"
 mod_wsgi_source_path: "{{ mod_wsgi_work_path }}/mod_wsgi-{{ mod_wsgi_version }}"
 httpd_modules_path: /usr/lib64/httpd/modules

@@ -15,6 +15,18 @@
 #------------------------------------------------------------------------------#
 # download mod_wsgi
 
+# make sure base folder exists.
+- name: make sure there is a "{{ mod_wsgi_base_path }}" folder
+  file:
+    path: "{{ mod_wsgi_base_path }}"
+    state: directory
+
+# make sure work folder exists.
+- name: make sure there is a "{{ mod_wsgi_work_path }}" folder
+  file:
+    path: "{{ mod_wsgi_work_path }}"
+    state: directory
+
 # does install file already exist?
 - name: Ansible check if install file already downloaded to {{ ansible_user_home_folder }}/Downloads/{{ mod_wsgi_version }}.tar.gz.
   stat:

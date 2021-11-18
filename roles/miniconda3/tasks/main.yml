@@ -44,15 +44,15 @@
     - miniconda_install_folder_exists.stat.exists == false
 
 #------------------------------------------------------------------------------#
-# add links to python 3.7 libraries to /usr/local/lib:
+# add links to python libraries to /usr/local/lib:
 
-# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so /usr/local/lib
-- name: add link to libpython3.7m.so to /usr/local/lib
+# sudo ln -s /opt/miniconda3/lib/libpython{miniconda_python_version}m.so /usr/local/lib
+- name: add link to libpython{{ miniconda_python_version }}.so to /usr/local/lib
   become: yes
   become_user: root
   file:
-    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so"
-    dest: /usr/local/lib/libpython3.7m.so
+    src: "{{ miniconda_install_folder }}/lib/libpython{{ miniconda_python_version }}.so"
+    dest: /usr/local/lib/libpython{{ miniconda_python_version }}.so
     owner: root
     group: root
     state: link
@@ -60,13 +60,13 @@
     - do_miniconda3 == true
     - do_miniconda3_links == true
 
-# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1.0 /usr/local/lib
-- name: add link to libpython3.7m.so.1.0 to /usr/local/lib
+# sudo ln -s /opt/miniconda3/lib/libpython{{ miniconda_python_version }}.so.1.0 /usr/local/lib
+- name: add link to libpython{{ miniconda_python_version }}.so.1.0 to /usr/local/lib
   become: yes
   become_user: root
   file:
-    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so.1.0"
-    dest: /usr/local/lib/libpython3.7m.so.1.0
+    src: "{{ miniconda_install_folder }}/lib/libpython{{ miniconda_python_version }}.so.1.0"
+    dest: /usr/local/lib/libpython{{ miniconda_python_version }}.so.1.0
     owner: root
     group: root
     state: link
@@ -75,7 +75,7 @@
     - do_miniconda3_links == true
 
 #------------------------------------------------------------------------------#
-# add links to python 3.7 libraries to ld config:
+# add links to python libraries to ld config:
 
 # create side lib folder {{ miniconda_lib_link_folder }}
 - name: make sure there is a "{{ miniconda_lib_link_folder }}" folder
@@ -95,13 +95,13 @@
 #     conflict with ones used by CentOS core programs, and this will cause your
 #     system to seize up.
 
-# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so {{ miniconda_lib_link_folder }}
-- name: add link to libpython3.7m.so to {{ miniconda_lib_link_folder }}
+# sudo ln -s /opt/miniconda3/lib/libpython{{ miniconda_python_version }}.so {{ miniconda_lib_link_folder }}
+- name: add link to libpython{{ miniconda_python_version }}.so to {{ miniconda_lib_link_folder }}
   become: yes
   become_user: root
   file:
-    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so"
-    dest: "{{ miniconda_lib_link_folder }}/libpython3.7m.so"
+    src: "{{ miniconda_install_folder }}/lib/libpython{{ miniconda_python_version }}.so"
+    dest: "{{ miniconda_lib_link_folder }}/libpython{{ miniconda_python_version }}.so"
     owner: root
     group: root
     state: link
@@ -110,13 +110,13 @@
     - do_miniconda3_links == true
     - miniconda_lib_link_folder != ""
 
-# sudo ln -s /opt/miniconda3/lib/libpython3.7m.so.1.0 {{ miniconda_lib_link_folder }}
-- name: add link to libpython3.7m.so.1.0 to {{ miniconda_lib_link_folder }}
+# sudo ln -s /opt/miniconda3/lib/libpython{{ miniconda_python_version }}.so.1.0 {{ miniconda_lib_link_folder }}
+- name: add link to libpython{{ miniconda_python_version }}.so.1.0 to {{ miniconda_lib_link_folder }}
   become: yes
   become_user: root
   file:
-    src: "{{ miniconda_install_folder }}/lib/libpython3.7m.so.1.0"
-    dest: "{{ miniconda_lib_link_folder }}/libpython3.7m.so.1.0"
+    src: "{{ miniconda_install_folder }}/lib/libpython{{ miniconda_python_version }}.so.1.0"
+    dest: "{{ miniconda_lib_link_folder }}/libpython{{ miniconda_python_version }}.so.1.0"
     owner: root
     group: root
     state: link

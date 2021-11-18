@@ -38,6 +38,7 @@
       - sqlite-devel
       - vim
       - expect
+      - libsemanage-python
     state: present
   when: server_centos_package_manager == "dnf"
 
@@ -58,6 +59,7 @@
       - sqlite
       - sqlite-devel
       - vim
+      - libsemanage-python
     state: present
   when: server_centos_package_manager == "yum"
 
@@ -89,6 +91,20 @@
   shell: "python3 get-pip.py"
   args:
     chdir: /home/{{ansible_user}}/Downloads
+
+# ==> pyopenssl
+
+# install pyopenssl in python 2
+- name: Install pyopenssl in python 2
+  become: yes
+  become_user: root
+  shell: "python -m pip install pyopenssl"
+
+# install pyopenssl in python 3
+- name: Install pip in python 3
+  become: yes
+  become_user: root
+  shell: "python3 -m pip install pyopenssl"
 
 # ==> virtualenv and virtualenvwrapper in python 3.
 - name: install virtualenv and virtualenvwrapper in python 3

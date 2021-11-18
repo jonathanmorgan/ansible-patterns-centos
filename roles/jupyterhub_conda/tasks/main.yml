@@ -38,7 +38,7 @@
 - name: Install jupyterhub-related packages in conda environment
   become: yes
   become_user: root
-  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner sudospawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator --yes
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner sudospawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator importlib_resources --yes
 
 #------------------------------------------------------------------------------#
 # ==> configuration

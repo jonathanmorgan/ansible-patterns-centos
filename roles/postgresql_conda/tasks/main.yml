@@ -1,5 +1,8 @@
 ---
 # This playbook will install and configure postgresql.
+# - postgresql conda environment is installed as named conda environment, "postgresql_service", stored by default in ~/.conda/envs/postgresql_service.
+# - to activate postgresql conda environment: `conda activate postgresql_service`
+# - to start, once env activated: `./start_pgsql.sh`
 
 # see if there is a conda environment for postgresql.
 - name: Check for presence of postgresql env "{{ postgresql_conda_env }}"

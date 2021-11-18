@@ -2,6 +2,7 @@
 anaconda_install_folder: /opt/miniconda3
 anaconda_bin_path: "{{ anaconda_install_folder }}/bin"
 anaconda_pip_executable: "{{ anaconda_bin_path }}/pip3"
+#miniconda_python_version: "3.9"
 
 # python
 python_2_pip_executable: "/usr/bin/pip2"

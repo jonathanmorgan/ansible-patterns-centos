@@ -42,6 +42,9 @@ virtualenv_parent_folder: "{{ ansible_user_home_folder }}"
 virtualenv_folder: "{{ virtualenv_parent_folder }}/.virtualenvs"
 virtualenv_project_folder: "{{ work_folder }}/vew-projects"
 
+# miniconda configuration
+#miniconda_python_version: "3.9"
+
 # postgresql configuration
 # ubuntu 16.04
 #server_pgsql_version: "9.5"

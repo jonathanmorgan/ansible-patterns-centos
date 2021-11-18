@@ -36,15 +36,15 @@
   roles:
     - jupyterhub
 
-- name: deploy R
-  hosts: r_servers
-  roles:
-    - r
+#- name: deploy R
+#  hosts: r_servers
+#  roles:
+#    - r
 
-- name: deploy RStudio server
-  hosts: rstudio_servers
-  roles:
-    - rstudio
+#- name: deploy RStudio server
+#  hosts: rstudio_servers
+#  roles:
+#    - rstudio
 
 - name: deploy django project
   hosts: django_servers
