@@ -2,7 +2,7 @@
 python_3_path: /usr/bin/python3
 python_2_path: /usr/bin/python
 ansible_user: jonathanmorgan
-# if CentOS 8, use python 3. If CentOS 7, use python 2.
+# use python 3 for both CentOS 7 and 8.
 ansible_python_interpreter: "{{ python_3_path }}"
 # ansible_become: yes
 ansible_become_user: root
@@ -18,7 +18,8 @@ ansible_become_password: !vault |
 python_2_pip_executable: "/usr/bin/pip2"
 python_3_pip_executable: "/usr/local/bin/pip3"
 miniconda3_pip_executable: "/opt/miniconda3/bin/pip3"
-pip_executable: "{{ python_2_pip_executable }}"
+# use python 3 for both CentOS 7 and 8.
+pip_executable: "{{ python_3_pip_executable }}"
 
 # configuration
 server_host_name: research

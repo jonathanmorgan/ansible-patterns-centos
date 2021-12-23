@@ -99,6 +99,7 @@
   become: yes
   become_user: root
   shell: "python -m pip install pyopenssl"
+  when: install_pyopenssl_2 == true
 
 # install pyopenssl in python 3
 - name: Install pip in python 3
