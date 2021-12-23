@@ -1,6 +1,6 @@
 # install mod_wsgi
 mod_wsgi_action: "install"  # "clean" to just remove, "install" to "clean", then build and install.
-mod_wsgi_version: 4.7.1
+mod_wsgi_version: 4.9.0
 miniconda_python_version: "3.9"
 python_home_path: /opt/miniconda3
 #python_home_path: /opt/python3.8
