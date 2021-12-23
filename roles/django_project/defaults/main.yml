@@ -24,6 +24,10 @@ django_virtualenv_path: "{{ django_virtualenv_home_path }}/{{ django_virtualenv_
 django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
 django_virtualenv_python_version: "{{ python_base_version }}"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
 
+# for older versions of django, it is "django-admin.py". For newer (post-3.2?) it is just "django-admin".
+django_admin_command: "django-admin.py"
+#django_admin_command: "django-admin"
+
 # django project database constants-ish
 db_postgresql_python_package: "psycopg2-binary"
 db_postgresql_port: "5432"

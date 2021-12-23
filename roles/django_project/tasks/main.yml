@@ -47,11 +47,11 @@
     virtualenv: "{{ django_virtualenv_path }}"
     name:
       - pip
-      - django
+      - django<4.0
       - "{{ django_db_python_package }}"
       - ipython
       - ipykernel
-      - django-ajax-selects
+      - django-autocomplete-light
       - django-taggit
       - beautifulsoup4
       - requests
@@ -81,7 +81,7 @@
 
 # create django project
 - name: create django project
-  shell: "{{ django_virtualenv_bin_path }}/django-admin.py startproject {{ django_project_name }}"
+  shell: "{{ django_virtualenv_bin_path }}/{{django_admin_command}} startproject {{ django_project_name }}"
   args:
     chdir: "{{ django_project_parent_folder_path }}/"
   when: django_project.stat.exists == False

@@ -101,11 +101,15 @@
   shell: "python -m pip install pyopenssl"
   when: install_pyopenssl_2 == true
 
-# install pyopenssl in python 3
-- name: Install pip in python 3
+# ==> install pyopenssl and selinux in base pip_executable.
+- name: install pyopenssl and selinux in base {{ pip_executable }}
   become: yes
   become_user: root
-  shell: "python3 -m pip install pyopenssl"
+  pip:
+    executable: "{{ pip_executable }}"
+    name:
+      - pyopenssl
+      - selinux
 
 # ==> virtualenv and virtualenvwrapper in python 3.
 - name: install virtualenv and virtualenvwrapper in python 3
@@ -118,6 +122,7 @@
       - virtualenvwrapper
       - ipykernel
       - bagit
+      - pyopenssl
 
 # create default virtaulenv folder "{{ virtualenv_folder }} for ansible user.
 - name: make sure there is a {{ virtualenv_folder }} folder in ansible_user

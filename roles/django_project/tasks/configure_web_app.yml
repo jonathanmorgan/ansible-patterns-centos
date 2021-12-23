@@ -86,10 +86,12 @@
 - name: Configure SELinux to allow httpd to access homedirs
   become: yes
   become_user: root
-  seboolean: name=httpd_enable_homedirs state=true persistent=yes
+  shell: "setsebool -P httpd_enable_homedirs 1"
+#  seboolean: name=httpd_enable_homedirs state=true persistent=yes
 
 # and this: setsebool -P httpd_read_user_content 1
 - name: Configure SELinux to allow httpd to access user files
   become: yes
   become_user: root
-  seboolean: name=httpd_read_user_content state=true persistent=yes
+  shell: "setsebool -P httpd_read_user_content 1"
+#  seboolean: name=httpd_read_user_content state=true persistent=yes

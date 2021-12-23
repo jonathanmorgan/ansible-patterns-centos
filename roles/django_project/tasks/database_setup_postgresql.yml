@@ -6,6 +6,7 @@
   become: yes
   become_user: root
   pip:
+    executable: "{{ pip_executable }}"
     name:
       - "{{ django_db_python_package }}"
     state: latest
