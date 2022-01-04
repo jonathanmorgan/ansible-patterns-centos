@@ -103,9 +103,6 @@
   template:
     src: urls.py.j2
     dest: '{{ django_project_folder_path }}/{{ django_project_name }}/urls.py'
-  notify:
-  - "set-django-project-permissions"
-
 
 # create django log file
 - name: make sure there is a "{{ django_log_file_path }}" log file.

@@ -59,6 +59,8 @@
   file:
     path: "{{ django_project_folder_path }}/{{ django_project_name }}/wsgi.py"
     state: touch
+  notify:
+  - "set-django-project-permissions"
 
 #- name: Install http and php etc
 #  yum: name={{ item }} state=present
