@@ -44,7 +44,7 @@
 # create do, start, stop and restart scripts
 
 # place start_pgsql.sh in {{ postgresql_home_path }}
-- name: place start_pgsql.sh in {{ postgresql_home_path }}
+- name: place do_pgsql.sh in {{ postgresql_home_path }}
   template:
     src: do_pgsql.sh.j2
     dest: "{{ postgresql_home_path }}/do_pgsql.sh"
