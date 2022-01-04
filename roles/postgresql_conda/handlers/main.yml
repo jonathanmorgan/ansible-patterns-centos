@@ -2,7 +2,7 @@
 # Handler to handle DB tier notifications
 
 - name: restart postgresql
-  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_log_path }}/logfile-$( date "+%Y%m%dT%H%M%S" ) restart
+  shell: "{{ postgresql_home_path }}/restart_pgsql.sh"
 
 # reload firewall
 - name: reload firewall
