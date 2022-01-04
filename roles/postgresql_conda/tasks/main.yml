@@ -92,7 +92,7 @@
 
 # start database in {{ postgresql_data_path }}
 - name: start database in {{ postgresql_data_path }}
-  shell: source {{ anaconda_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_log_path }}/logfile-{{ ansible_date_time.iso8601_basic_short }} start
+  shell: "{{ postgresql_home_path }}/start_pgsql.sh"
 
 # set to listen on defined listen_addresses.
 - name: Set listen_addresses for postgresql
