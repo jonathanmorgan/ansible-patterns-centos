@@ -2,6 +2,7 @@
 server_pgsql_version: 12
 anaconda_install_folder: /opt/miniconda3
 anaconda_bin_path: "{{ anaconda_install_folder }}/bin"
+anaconda_base_bin_path: "{{ anaconda_bin_path }}"
 postgresql_user: "{{ ansible_user }}"
 postgresql_conda_env: "postgresql_service"
 postgresql_home_path: "{{ ansible_user_home_folder }}/postgresql"

@@ -140,3 +140,10 @@
   when:
     - server_pgsql_admin_user != ""
     - server_pgsql_admin_password != ""
+
+# Set postgresql to start on reboot in ansible_user's crontab
+- name: Set postgresql to start on reboot in ansible_user's crontab
+  ansible.builtin.cron:
+    name: "reboot - start postgresql"
+    special_time: reboot
+    job: "{{ postgresql_home_path }}/start_pgsql.sh >> {{ postgresql_log_path }}/cronlog.out 2>&1"
