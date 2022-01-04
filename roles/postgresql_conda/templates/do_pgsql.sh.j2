@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# do action - postgresql
+action = "${1}"
+
+# need conda env {{ postgresql_conda_env }} activated.
+#pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_log_path }}/logfile-$( date "+%Y%m%dT%H%M%S" ) ${action}
+
+# do not need conda env {{ postgresql_conda_env }} activated.
+source {{ anaconda_base_bin_path }}/activate {{ postgresql_conda_env }} && pg_ctl -D {{ postgresql_data_path }} -l {{ postgresql_log_path }}/logfile-$( date "+%Y%m%dT%H%M%S" ) ${action}

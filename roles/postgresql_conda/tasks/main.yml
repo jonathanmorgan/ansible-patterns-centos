@@ -41,7 +41,14 @@
     state: directory
   when: postgresql_home_folder_exists.stat.exists == false
 
-# create start and stop scripts
+# create do, start, stop and restart scripts
+
+# place start_pgsql.sh in {{ postgresql_home_path }}
+- name: place start_pgsql.sh in {{ postgresql_home_path }}
+  template:
+    src: do_pgsql.sh.j2
+    dest: "{{ postgresql_home_path }}/do_pgsql.sh"
+    mode: 0755
 
 # place start_pgsql.sh in {{ postgresql_home_path }}
 - name: place start_pgsql.sh in {{ postgresql_home_path }}
@@ -55,6 +62,13 @@
   template:
     src: stop_pgsql.sh.j2
     dest: "{{ postgresql_home_path }}/stop_pgsql.sh"
+    mode: 0755
+
+# place start_pgsql.sh in {{ postgresql_home_path }}
+- name: place restart_pgsql.sh in {{ postgresql_home_path }}
+  template:
+    src: restart_pgsql.sh.j2
+    dest: "{{ postgresql_home_path }}/restart_pgsql.sh"
     mode: 0755
 
 # check if log directory already exists.
