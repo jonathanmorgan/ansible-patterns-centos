@@ -114,7 +114,7 @@ django_config_folder_path: "{{ django_project_folder_path }}/{{ django_project_n
 django_log_file_path: "{{ log_folder }}/django-{{ django_project_name }}.log"
 django_static_folder_path: "{{ server_webroot_folder }}/static"
 django_settings_import: "{{ django_project_name }}.settings"
-#django_project_folder_mode: 0777
+#django_project_folder_mode: "777"
 django_db_name: "{{ django_project_name }}"
 django_db_username: "django_user"
 django_db_password: "{{ ansible_become_password }}"
