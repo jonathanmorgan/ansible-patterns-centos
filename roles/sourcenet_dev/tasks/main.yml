@@ -275,7 +275,9 @@
   lineinfile:
     path: '{{ django_config_folder_path }}/settings.py'
     line: "LOGOUT_URL = '/'"
-  notify: touch wsgi.py
+  notify:
+  - "touch wsgi.py"
+  - "set-django-project-permissions"
 
 # should end up touch-ing wsgi.py to reload everything.
 

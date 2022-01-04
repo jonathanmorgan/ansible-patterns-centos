@@ -40,8 +40,17 @@
     name: mysqld
     state: restarted
 
-# touch wsgi.py to reload mod_wsgi.
+# django - touch wsgi.py to reload mod_wsgi.
 - name: touch wsgi.py
   file:
     path: "{{ django_project_folder_path }}/{{ django_project_name }}/wsgi.py"
     state: touch
+
+# django - if django project folder mode set, recursively set permissions to
+#     match.
+- name: set-django-project-permissions
+  file:
+    path: "{{ django_project_folder_path }}"
+    mode: "{{ django_project_folder_mode }}"
+    recurse: yes
+  when: ( django_project_folder_mode is defined ) and ( django_project_folder_mode > 0 )
