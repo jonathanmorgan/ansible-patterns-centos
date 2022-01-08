@@ -1,5 +1,6 @@
 ---
-# Install pre-req packages
+#------------------------------------------------------------------------------#
+# ==> Install pre-req packages
 - name: install lxml pre-reqs (dnf)
   become: yes
   become_user: root
@@ -12,7 +13,9 @@
       - libyaml-devel
       - expect
     state: present
-  when: server_centos_package_manager == "dnf"
+  when:
+    - django_install_os_packages == true
+    - server_centos_package_manager == "dnf"
 
 - name: install lxml pre-reqs (yum)
   become: yes
@@ -26,20 +29,152 @@
       - libyaml-devel
       - expect
     state: present
-  when: server_centos_package_manager == "yum"
+  when:
+    - django_install_os_packages == true
+    - server_centos_package_manager == "yum"
 
-# check if virtualenv already there.
+#------------------------------------------------------------------------------#
+# ==> django home folder
+
+# check if django folder is in /apps
+- name: Check if directory {{ django_home_folder_path }} exists
+  stat:
+    path: "{{ django_home_folder_path }}"
+  register: django_home_folder_exists
+
+# if not, create, then update ownership, group, and permissions.
+- name: make sure there is a "{{ django_home_folder_path }}" folder (using ansible "file")
+  become: yes
+  become_user: root
+  become_method: sudo
+  file:
+    path: "{{ django_home_folder_path }}"
+    state: directory
+  when:
+    - django_setup_folders == true
+    - django_home_folder_exists.stat.exists == false
+
+- name: Change owner of "{{ django_home_folder_path }}" to ansible user ( {{ ansible_user }} ).
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: chown {{ ansible_user }}:{{ server_default_group }} {{ django_home_folder_path }}
+  when:
+    - django_setup_folders == true
+    - django_home_folder_exists.stat.exists == false
+
+- name: Change group permissions to match user permissions.
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: chmod g=u {{ django_home_folder_path }}
+  when:
+    - django_setup_folders == true
+    - django_home_folder_exists.stat.exists == false
+
+- name: Set group sticky bit
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: chmod g+s {{ django_home_folder_path }}
+  when:
+    - django_setup_folders == true
+    - django_home_folder_exists.stat.exists == false
+
+#------------------------------------------------------------------------------#
+# ==> django project folder
+
+# check if django project folder exists
+- name: Check if directory {{ django_project_home_path }} exists
+  stat:
+    path: "{{ django_project_home_path }}"
+  register: django_project_folder_exists
+
+# create project folder
+- name: make sure there is a "{{ django_project_home_path }}" folder (using ansible "file")
+  file:
+    path: "{{ django_project_home_path }}"
+    state: directory
+  when:
+    - django_project_folder_exists.stat.exists == false
+
+#------------------------------------------------------------------------------#
+# ==> conda environment
+
+# see if there is a conda environment for django project.
+- name: Check for presence of django project conda env "{{ django_conda_env_path }}"
+  shell: source {{ anaconda_base_bin_path }}/activate && conda info --envs | grep {{ django_conda_env_path }}
+  register: conda_env_exists_check
+  failed_when: conda_env_exists_check.rc == 2
+  when:
+    - django_python_env_type == python_env_type_conda
+
+# To see detailed output
+- debug:
+    var: conda_env_exists_check
+  when:
+    - django_python_env_type == python_env_type_conda
+
+# if no environment, create one.
+- name: Create django project env "{{ django_conda_env }}" if not already present.
+  shell: source {{ anaconda_base_bin_path }}/activate && conda create --{{ django_conda_env_type }} {{ django_conda_env }} python --yes
+  when:
+    - conda_env_exists_check.rc == 1
+    - conda_env_exists_check.stdout == ""
+    - django_python_env_type == python_env_type_conda
+
+#------------------------------------------------------------------------------#
+# ==> install python packages
+
+# CONDA - install django, db package, and other essentials in virtualenv
+- name: CONDA - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && conda install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --yes
+  when:
+    - django_package_installer == "conda"
+    - django_python_env_type == python_env_type_conda
+
+# ==> Install with pip...?
+
+# CONDA - install django, db package, and other essentials in virtualenv
+- name: PIP - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
+
+# install conda env as jupyter kernel
+- name: make {{ django_project_name }} project conda env a system-wide kernel
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python -m ipykernel install --name {{ django_project_name }} --display-name "{{ django_project_name }}_conda_env"
+  when:
+    - django_update_system_jupyter == true
+    - django_python_env_type == python_env_type_conda
+
+- name: make {{ django_project_name }} project conda env a user-space kernel
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python -m ipykernel install --user --name {{ django_project_name }} --display-name "{{ django_project_name }}_conda_env"
+  when:
+    - django_update_system_jupyter == false
+    - django_python_env_type == python_env_type_conda
+
+#------------------------------------------------------------------------------#
+# ==> virtualenv - check if virtualenv already there.
 - name: check if virtualenv exists ({{ django_virtualenv_path }})
   stat:
     path: '{{ django_virtualenv_path }}'
   register: django_virtualenv
+  when:
+    - django_python_env_type == python_env_type_virtualenv
 
 # create virtualenv for django project
 - name: create virtualenv for django project
   shell: "{{ django_virtualenv_from_env_bin }}/virtualenv {{ django_virtualenv_name }} --python {{ django_virtualenv_from_env_python }}"
   args:
     chdir: "{{ virtualenv_folder }}/"
-  when: django_virtualenv.stat.exists == False
+  when:
+    - django_virtualenv.stat.exists == False
+    - django_python_env_type == python_env_type_virtualenv
 
 # install django, db package, and other essentials in virtualenv
 - name: install django and db package in virtualenv {{ django_virtualenv_path }}
@@ -60,12 +195,19 @@
     state: latest
   environment:
     PATH: "{{ db_postgresql_bin_path }}:$PATH"
+  when:
+    - django_python_env_type == python_env_type_virtualenv
 
 # install virtualenv as jupyter kernel
 - name: make {{ django_project_name }} project virtualenv a kernel
   become: yes
   become_user: root
   shell: '{{ django_virtualenv_bin_path }}/python -m ipykernel install --name {{ django_project_name }} --display-name "{{ django_project_name }}_virtualenv"'
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+
+#------------------------------------------------------------------------------#
+# ==> actual django project
 
 # create django project parent folder {{ django_project_parent_folder_path }}
 - name: create django project parent folder {{ django_project_parent_folder_path }}
@@ -104,6 +246,22 @@
     src: urls.py.j2
     dest: '{{ django_project_folder_path }}/{{ django_project_name }}/urls.py'
 
+#===============================================================================
+# ==> set up logs.
+
+# check if django logs folder already there.
+- name: check if django logs folder already there.
+  stat:
+    path: '{{ django_logs_folder_path }}'
+  register: django_logs_folder
+
+# create django logs folder
+- name: create django logs folder
+  file:
+    path: "{{ django_logs_folder_path }}"
+    state: directory
+  when: django_logs_folder.stat.exists == False
+
 # create django log file
 - name: make sure there is a "{{ django_log_file_path }}" log file.
   file:
@@ -114,13 +272,17 @@
 #===============================================================================
 # ==> set up database.
 
-- name: 
+- name:
   include: database_setup_postgresql.yml
   when: django_database_type == "postgresql"
 
-- name: 
+- name:
   include: database_setup_mysql.yml
   when: django_database_type == "mysql"
+
+- name:
+  include: database_setup_sqlite3.yml
+  when: django_database_type == "sqlite3"
 
 # create django superuser
 
@@ -152,15 +314,35 @@
     command: shell -c "from django.contrib.auth import get_user_model; MyUser = get_user_model(); MyUser.objects.filter( username__exact = '{{ django_superuser_username }}' ).count() == 0 or exit(); new_super_user = MyUser( username = '{{ django_superuser_username }}', password='{{ django_superuser_password }}', email='{{ django_superuser_email }}', is_superuser = True, is_staff = True ); new_super_user.save();"
     app_path: "{{ django_project_folder_path }}"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+
+# check if superuser user exists, if not, create user.
+- name: Check if superuser user exists, if not, create user.
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python manage.py shell -c "from django.contrib.auth import get_user_model; MyUser = get_user_model(); MyUser.objects.filter( username__exact = '{{ django_superuser_username }}' ).count() == 0 or exit(); new_super_user = MyUser( username = '{{ django_superuser_username }}', password='{{ django_superuser_password }}', email='{{ django_superuser_email }}', is_superuser = True, is_staff = True ); new_super_user.save();"
+  args:
+    chdir: "{{ django_project_folder_path }}/"
+  when:
+    - django_python_env_type == python_env_type_conda
 
 # set admin password
 
 # place script to update password.
-- name: Change password tricks
+- name: Change password tricks (virtualenv)
   template:
-    src: changepassword.sh.j2
+    src: changepassword.sh-virtualenv.j2
     dest: "{{ django_project_folder_path }}/changepassword.sh"
     mode: 0755
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+
+- name: Change password tricks (conda)
+  template:
+    src: changepassword.sh-conda.j2
+    dest: "{{ django_project_folder_path }}/changepassword.sh"
+    mode: 0755
+  when:
+    - django_python_env_type == python_env_type_conda
 
 # set password.
 - name: Change password
@@ -179,3 +361,5 @@
 #===============================================================================
 # ==> configure the django web app.
 - include: configure_web_app.yml
+  when:
+    - django_configure_apache == true

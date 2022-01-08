@@ -11,6 +11,10 @@
       - "{{ django_db_python_package }}"
     state: latest
 
+# Install psycopg2 in django python environment.
+#- name: install db package {{ django_db_python_package }} in django python environment.
+#  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && conda install {{ django_db_python_package }} --yes
+
 # create database role/user for django app in postgres
 - name: Create django database user {{ django_db_username }}
   postgresql_user:
@@ -22,6 +26,10 @@
     password: '{{ django_db_password }}'
     encrypted: yes
     role_attr_flags: LOGIN
+#  shell: source {{ anaconda_base_bin_path }}/activate {{ postgresql_conda_env }} && psql postgres -c "DO \$do\$ BEGIN IF NOT EXISTS( SELECT * FROM pg_catalog.pg_roles WHERE rolname = '{{ django_db_username }}' ) THEN CREATE USER {{ django_db_username }} WITH PASSWORD '{{ django_db_password }}'; END IF; END \$do\$;"
+  when:
+    - django_db_username is defined
+    - django_db_username != ""
 
 # create database for django app in postgres
 - name: create postgresql database for django_project named {{ django_db_name }}
@@ -31,6 +39,11 @@
     login_password: "{{ server_pgsql_admin_password }}"
     name: "{{ django_db_name }}"
     owner: "{{ django_db_username }}"
+# based on: https://stackoverflow.com/questions/18389124/simulate-create-database-if-not-exists-for-postgresql
+#  shell: source {{ anaconda_base_bin_path }}/activate {{ postgresql_conda_env }} && echo "SELECT 'CREATE DATABASE {{ django_db_name }} WITH OWNER = {{ django_db_username }}' WHERE NOT EXISTS( SELECT * FROM pg_catalog.pg_database WHERE datname = '{{ django_db_name }}' )\gexec" | psql postgres
+  when:
+    - django_db_name is defined
+    - django_db_name != ""
 
 # run `python manage.py migrate`
 #- name: run `python manage.py migrate`
@@ -43,3 +56,11 @@
     app_path: "{{ django_project_folder_path }}"
     command: migrate
     virtualenv: "{{ django_virtualenv_path }}"
+#  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python manage.py migrate
+#  args:
+#    chdir: "{{ django_project_folder_path }}/"
+  when:
+    - django_db_username is defined
+    - django_db_username != ""
+    - django_db_name is defined
+    - django_db_name != ""

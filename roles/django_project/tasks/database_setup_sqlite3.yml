@@ -1,0 +1,17 @@
+---
+# Setup database for django.
+
+# run `python manage.py migrate`
+- name: run `python manage.py migrate` using virtualenv
+  shell: "{{ django_virtualenv_bin_folder_path }}/python manage.py migrate"
+  args:
+    chdir: "{{ django_project_folder_path }}"
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+
+- name: run `python manage.py migrate` in {{ django_project_folder_path }} using conda env
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python manage.py migrate
+  args:
+    chdir: "{{ django_project_folder_path }}/"
+  when:
+    - django_python_env_type == python_env_type_conda

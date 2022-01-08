@@ -1,18 +1,6 @@
 ---
 # These tasks configure django web applications.
 
-# put wsgi.py in place
-- name: put wsgi.py in place
-  template:
-    src: wsgi.py.j2
-    dest: '{{ django_project_folder_path }}/{{ django_project_name }}/wsgi.py'
-
-# put urls.py in place
-- name: put urls.py in place
-  template:
-    src: urls.py.j2
-    dest: '{{ django_project_folder_path }}/{{ django_project_name }}/urls.py'
-
 # add django app to apache conf.
 - name: add django app to apache conf.
   become: yes
@@ -21,7 +9,8 @@
     src: django-research.conf.j2
     dest: '/etc/httpd/conf.d/django-{{ django_project_name }}.conf'
   notify: restart httpd
-  when: django_configure_apache == true
+  when:
+    - django_configure_apache == true
 
 # --> give apache user access to virtualenv
 
@@ -32,7 +21,7 @@
 # troubleshooting:
 # - https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/modwsgi/
 # - https://stackoverflow.com/questions/55066782/no-module-named-encodings-error-when-deploying-django-app-on-apache-with-mod
-# - 
+# -
 
 # --> static files
 
@@ -44,13 +33,26 @@
     path: "{{ django_static_folder_path }}"
     state: directory
     mode: 0777
+  when:
+    - django_configure_apache == true
 
 # collect static
-- name: run `python manage.py collectstatic`
+- name: run `python manage.py collectstatic` (virtualenv)
   django_manage:
     app_path: "{{ django_project_folder_path }}"
     command: collectstatic --noinput
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_configure_apache == true
+    - django_python_env_type == python_env_type_virtualenv
+
+- name: run `python manage.py collectstatic` (conda env)
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python manage.py collectstatic --noinput
+  args:
+    chdir: "{{ django_project_folder_path }}/"
+  when:
+    - django_configure_apache == true
+    - django_python_env_type == python_env_type_conda
 
 # touch wsgi.py to restart wsgi
 - name: touch wsgi.py to restart wsgi
@@ -61,6 +63,8 @@
     state: touch
   notify:
   - "set-django-project-permissions"
+  when:
+    - django_configure_apache == true
 
 #- name: Install http and php etc
 #  yum: name={{ item }} state=present
@@ -90,6 +94,8 @@
   become_user: root
   shell: "setsebool -P httpd_enable_homedirs 1"
 #  seboolean: name=httpd_enable_homedirs state=true persistent=yes
+  when:
+    - django_configure_apache == true
 
 # and this: setsebool -P httpd_read_user_content 1
 - name: Configure SELinux to allow httpd to access user files
@@ -97,3 +103,5 @@
   become_user: root
   shell: "setsebool -P httpd_read_user_content 1"
 #  seboolean: name=httpd_read_user_content state=true persistent=yes
+  when:
+    - django_configure_apache == true

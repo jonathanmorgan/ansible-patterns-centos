@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.0/howto/deployment/wsgi/
 #    "RuntimeError: populate() isn't reentrant"
 import os
 def application(environ, start_response):
-    if environ['mod_wsgi.process_group'] != '': 
+    if environ['mod_wsgi.process_group'] != '':
         import signal
         os.kill(os.getpid(), signal.SIGINT)
     return ["killed"]
@@ -25,18 +25,26 @@ import site
 import six
 
 # declare variables
+python_env_type_conda = "{{ python_env_type_conda }}"
+python_env_type_virtualenv = "{{ python_env_type_virtualenv }}"
+python_env_type = ""
 django_project_name = ""
 path_to_django_project_parent = ""
-virtualenv_python2 = ""
 virtualenv_python3 = ""
 python_3_version = ""
-temp_path = ""
+temp_path = None
+
+# declare variables - anaconda
+anaconda_base_bin_path = ""
+conda_env_home_path = None
+conda_env_activate_command = None
+activate_code = None
 
 # configure
+python_env_type = "{{ django_python_env_type }}"
 django_project_name = "{{ django_project_name }}"
 virtualenv_folder_path = "{{ django_virtualenv_home_path }}"
 path_to_django_project_parent = "{{ django_project_parent_folder_path }}"
-virtualenv_python2 = None
 virtualenv_python3 = "{{ django_virtualenv_name }}"
 python_3_version = "{{ django_virtualenv_python_version }}"
 
@@ -45,28 +53,49 @@ temp_path = "{}/{}".format( path_to_django_project_parent, django_project_name )
 sys.path.append( temp_path )
 
 # Set DJANGO_SETTINGS_MODULE
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{}.settings".format( django_project_name ) )
+os.environ.setdefault( "DJANGO_SETTINGS_MODULE", "{}.settings".format( django_project_name ) )
 
 # Activate your virtualenv - only support Python 3.
 
-# Add the site-packages of the desired virtualenv
-temp_path = virtualenv_folder_path + "/" + virtualenv_python3 + "/lib/python" + python_3_version + "/site-packages"
-site.addsitedir( temp_path )
+# Set up the desired environment
+if ( python_env_type == python_env_type_virtualenv ):
 
-# Activate your virtualenv
-temp_path = virtualenv_folder_path + "/" + virtualenv_python3 + "/bin/activate_this.py"
-activate_this = os.path.expanduser( temp_path )
+    # Add the site-packages of the virtualenv
+    temp_path = virtualenv_folder_path + "/" + virtualenv_python3 + "/lib/python" + python_3_version + "/site-packages"
+    site.addsitedir( temp_path )
 
-# open and execute file manually... cuz Python 3.
-with open( activate_this ) as activate_this_file:
+    # Activate environment?
+    temp_path = virtualenv_folder_path + "/" + virtualenv_python3 + "/bin/activate_this.py"
+    activate_this = os.path.expanduser( temp_path )
+
+    # open and execute file manually... cuz Python 3.
+    with open( activate_this ) as activate_this_file:
+
+        # compile code
+        activate_code = compile( activate_this_file.read(), activate_this, 'exec')
+
+        # run the code
+        exec( activate_code, dict( __file__ = activate_this ) )
+
+    #-- END open( activate_this ) --#
+
+elif ( python_env_type == python_env_type_conda )
+
+    # conda env
+    temp_path = conda_env_home_path + "/lib/python" + python_3_version + "/site-packages"
+    site.addsitedir( temp_path )
+
+    # Activate your conda env? I don't think you need to...
+    # command:
+    #conda_env_activate_command = "source {}/activate {}".format( anaconda_base_bin_path, conda_env_home_path )
 
     # compile code
-    activate_code = compile( activate_this_file.read(), activate_this, 'exec')
+    #activate_code = compile( conda_env_activate_command, "anaconda_doc", 'exec')
 
     # run the code
-    exec( activate_code, dict( __file__ = activate_this ) )
+    #exec( activate_code, dict( __file__ = activate_this ) )
 
-#-- END open( activate_this ) --#
+#-- END check to see what type of environment. --#
 
 # import django stuff - it is installed in your virtualenv, so you must import
 #     after activating virtualenv.

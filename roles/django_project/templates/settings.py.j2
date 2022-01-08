@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 import logging
 
 logging.basicConfig(
@@ -87,7 +86,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = '{{ django_project_name }}.wsgi.application'
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Database
 # https://docs.djangoproject.com/en/latest/ref/settings/#databases
@@ -100,14 +98,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #}
 
 DATABASES = {
-    'default': {        
+    'default': {
         # {{ django_database_type }} - {{ django_db_name }}
-        'ENGINE': '{{ django_db_engine }}', # Add 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '{{ django_db_name }}',                      # Or path to database file if using sqlite3.
-        'USER': '{{ django_db_username }}',                      # Not used with sqlite3.
-        'PASSWORD': '{{ django_db_password }}',                  # Not used with sqlite3.
-        'HOST': '{{ django_db_host }}',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '{{ django_db_port }}',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': '{{ django_db_engine }}',      # start with "django.db.backends.", then append 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '{{ django_db_name }}',          # Or path to database file if using sqlite3.
+        'USER': '{{ django_db_username }}',      # Not used with sqlite3.
+        'PASSWORD': '{{ django_db_password }}',  # Not used with sqlite3.
+        'HOST': '{{ django_db_host }}',          # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '{{ django_db_port }}',          # Set to empty string for default. Not used with sqlite3.
     },
 }
 
@@ -144,6 +142,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+# DEFAULT_AUTO_FIELD should be set in each application's AppConfig class.
+# normal sized tables
+#DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+# lots of rows
+#DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/latest/howto/static-files/
