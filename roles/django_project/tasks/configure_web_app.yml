@@ -2,15 +2,27 @@
 # These tasks configure django web applications.
 
 # add django app to apache conf.
-- name: add django app to apache conf.
+- name: add django app to apache conf (virtualenv).
   become: yes
   become_user: root
   template:
-    src: django-research.conf.j2
+    src: django-research.conf-virtualenv.j2
     dest: '/etc/httpd/conf.d/django-{{ django_project_name }}.conf'
   notify: restart httpd
   when:
     - django_configure_apache == true
+    - django_python_env_type == python_env_type_virtualenv
+
+- name: add django app to apache conf (conda env).
+  become: yes
+  become_user: root
+  template:
+    src: django-research.conf-conda.j2
+    dest: '/etc/httpd/conf.d/django-{{ django_project_name }}.conf'
+  notify: restart httpd
+  when:
+    - django_configure_apache == true
+    - django_python_env_type == python_env_type_conda
 
 # --> give apache user access to virtualenv
 
