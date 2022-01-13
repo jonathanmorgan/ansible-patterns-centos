@@ -1,5 +1,6 @@
 # related variables
 ansible_user_home_folder: "/home/{{ ansible_user }}"
+server_default_group: ""
 python_base_version: "3.9"
 #python_base_path: "/opt/python{{ python_base_version }}"
 anaconda_base_path: "/opt/miniconda3"
