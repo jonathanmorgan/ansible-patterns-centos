@@ -133,7 +133,8 @@
   shell: "{{ django_virtualenv_bin_path }}/{{django_admin_command}} startproject {{ django_project_name }}"
   args:
     chdir: "{{ django_project_parent_folder_path }}/"
-  when: django_project.stat.exists == False
+  when:
+    - django_project.stat.exists == False
     - django_python_env_type == python_env_type_virtualenv
 
 # check if superuser user exists, if not, create user.
