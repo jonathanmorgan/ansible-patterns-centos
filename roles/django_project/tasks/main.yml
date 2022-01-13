@@ -138,7 +138,7 @@
 
 # check if superuser user exists, if not, create user.
 - name: create django project (conda)
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{django_admin_command}} startproject {{ django_project_name }}"
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{django_admin_command}} startproject {{ django_project_name }}
   args:
     chdir: "{{ django_project_folder_path }}/"
   when:
