@@ -51,7 +51,7 @@
 #  args:
 #    chdir: "{{ django_project_folder_path }}"
 
-- name: run `python manage.py migrate`
+- name: run `python manage.py migrate` in {{ django_project_folder_path }} using virtualenv
   django_manage:
     app_path: "{{ django_project_folder_path }}"
     command: migrate
@@ -64,3 +64,15 @@
     - django_db_username != ""
     - django_db_name is defined
     - django_db_name != ""
+    - django_python_env_type == python_env_type_virtualenv
+
+- name: run `python manage.py migrate` in {{ django_project_folder_path }} using conda env
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python manage.py migrate
+  args:
+    chdir: "{{ django_project_folder_path }}/"
+  when:
+    - django_db_username is defined
+    - django_db_username != ""
+    - django_db_name is defined
+    - django_db_name != ""
+    - django_python_env_type == python_env_type_conda

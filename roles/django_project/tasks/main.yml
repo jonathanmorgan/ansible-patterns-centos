@@ -98,113 +98,20 @@
   when:
     - django_project_folder_exists.stat.exists == false
 
-#------------------------------------------------------------------------------#
-# ==> conda environment
+#===============================================================================
+# ==> install python environment.
 
-# see if there is a conda environment for django project.
-- name: Check for presence of django project conda env "{{ django_conda_env_path }}"
-  shell: source {{ anaconda_base_bin_path }}/activate && conda info --envs | grep {{ django_conda_env_path }}
-  register: conda_env_exists_check
-  failed_when: conda_env_exists_check.rc == 2
-  when:
-    - django_python_env_type == python_env_type_conda
+- name: Install conda environment
+  include: install_conda_env.yml
+  when: django_python_env_type == python_env_type_conda
 
-# To see detailed output
-- debug:
-    var: conda_env_exists_check
-  when:
-    - django_python_env_type == python_env_type_conda
+- name: Install virtualenv
+  include: install_virtualenv.yml
+  when: django_python_env_type == python_env_type_virtualenv
 
-# if no environment, create one.
-- name: Create django project env "{{ django_conda_env }}" if not already present.
-  shell: source {{ anaconda_base_bin_path }}/activate && conda create --{{ django_conda_env_type }} {{ django_conda_env }} python --yes
-  when:
-    - conda_env_exists_check.rc == 1
-    - conda_env_exists_check.stdout == ""
-    - django_python_env_type == python_env_type_conda
-
-#------------------------------------------------------------------------------#
-# ==> install python packages
-
-# CONDA - install django, db package, and other essentials in virtualenv
-- name: CONDA - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && conda install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --yes
-  when:
-    - django_package_installer == "conda"
-    - django_python_env_type == python_env_type_conda
-
-# ==> Install with pip...?
-
-# CONDA - install django, db package, and other essentials in virtualenv
-- name: PIP - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --no-input
-  when:
-    - django_package_installer == "pip"
-    - django_python_env_type == python_env_type_conda
-
-# install conda env as jupyter kernel
-- name: make {{ django_project_name }} project conda env a system-wide kernel
-  become: yes
-  become_user: root
-  become_method: sudo
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python -m ipykernel install --name {{ django_project_name }} --display-name "{{ django_project_name }}_conda_env"
-  when:
-    - django_update_system_jupyter == true
-    - django_python_env_type == python_env_type_conda
-
-- name: make {{ django_project_name }} project conda env a user-space kernel
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python -m ipykernel install --user --name {{ django_project_name }} --display-name "{{ django_project_name }}_conda_env"
-  when:
-    - django_update_system_jupyter == false
-    - django_python_env_type == python_env_type_conda
-
-#------------------------------------------------------------------------------#
-# ==> virtualenv - check if virtualenv already there.
-- name: check if virtualenv exists ({{ django_virtualenv_path }})
-  stat:
-    path: '{{ django_virtualenv_path }}'
-  register: django_virtualenv
-  when:
-    - django_python_env_type == python_env_type_virtualenv
-
-# create virtualenv for django project
-- name: create virtualenv for django project
-  shell: "{{ django_virtualenv_from_env_bin }}/virtualenv {{ django_virtualenv_name }} --python {{ django_virtualenv_from_env_python }}"
-  args:
-    chdir: "{{ virtualenv_folder }}/"
-  when:
-    - django_virtualenv.stat.exists == False
-    - django_python_env_type == python_env_type_virtualenv
-
-# install django, db package, and other essentials in virtualenv
-- name: install django and db package in virtualenv {{ django_virtualenv_path }}
-  pip:
-    virtualenv: "{{ django_virtualenv_path }}"
-    name:
-      - pip
-      - django<4.0
-      - "{{ django_db_python_package }}"
-      - ipython
-      - ipykernel
-      - django-autocomplete-light
-      - django-taggit
-      - beautifulsoup4
-      - requests
-      - w3lib
-      - six
-    state: latest
-  environment:
-    PATH: "{{ db_postgresql_bin_path }}:$PATH"
-  when:
-    - django_python_env_type == python_env_type_virtualenv
-
-# install virtualenv as jupyter kernel
-- name: make {{ django_project_name }} project virtualenv a kernel
-  become: yes
-  become_user: root
-  shell: '{{ django_virtualenv_bin_path }}/python -m ipykernel install --name {{ django_project_name }} --display-name "{{ django_project_name }}_virtualenv"'
-  when:
-    - django_python_env_type == python_env_type_virtualenv
+#- name: Install venv
+#  include: install_venv.yml
+#  when: django_python_env_type == python_env_type_venv
 
 #------------------------------------------------------------------------------#
 # ==> actual django project
@@ -222,11 +129,21 @@
   register: django_project
 
 # create django project
-- name: create django project
+- name: create django project (virtualenv)
   shell: "{{ django_virtualenv_bin_path }}/{{django_admin_command}} startproject {{ django_project_name }}"
   args:
     chdir: "{{ django_project_parent_folder_path }}/"
   when: django_project.stat.exists == False
+    - django_python_env_type == python_env_type_virtualenv
+
+# check if superuser user exists, if not, create user.
+- name: create django project (conda)
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{django_admin_command}} startproject {{ django_project_name }}"
+  args:
+    chdir: "{{ django_project_folder_path }}/"
+  when:
+    - django_python_env_type == python_env_type_conda
+
 
 # put settings.py in place
 - name: put settings.py in place
@@ -272,15 +189,15 @@
 #===============================================================================
 # ==> set up database.
 
-- name:
+- name: Setup PostgreSQL database.
   include: database_setup_postgresql.yml
   when: django_database_type == "postgresql"
 
-- name:
+- name: Setup MySQL database.
   include: database_setup_mysql.yml
   when: django_database_type == "mysql"
 
-- name:
+- name: Setup SQLite database.
   include: database_setup_sqlite3.yml
   when: django_database_type == "sqlite3"
 

@@ -1,0 +1,47 @@
+#------------------------------------------------------------------------------#
+# ==> virtualenv - check if virtualenv already there.
+- name: check if virtualenv exists ({{ django_virtualenv_path }})
+  stat:
+    path: '{{ django_virtualenv_path }}'
+  register: django_virtualenv
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+
+# create virtualenv for django project
+- name: create virtualenv for django project
+  shell: "{{ django_virtualenv_from_env_bin }}/virtualenv {{ django_virtualenv_name }} --python {{ django_virtualenv_from_env_python }}"
+  args:
+    chdir: "{{ virtualenv_folder }}/"
+  when:
+    - django_virtualenv.stat.exists == False
+    - django_python_env_type == python_env_type_virtualenv
+
+# install django, db package, and other essentials in virtualenv
+- name: install django and db package in virtualenv {{ django_virtualenv_path }}
+  pip:
+    virtualenv: "{{ django_virtualenv_path }}"
+    name:
+      - pip
+      - django<4.0
+      - "{{ django_db_python_package }}"
+      - ipython
+      - ipykernel
+      - django-autocomplete-light
+      - django-taggit
+      - beautifulsoup4
+      - requests
+      - w3lib
+      - six
+    state: latest
+  environment:
+    PATH: "{{ db_postgresql_bin_path }}:$PATH"
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+
+# install virtualenv as jupyter kernel
+- name: make {{ django_project_name }} project virtualenv a kernel
+  become: yes
+  become_user: root
+  shell: '{{ django_virtualenv_bin_path }}/python -m ipykernel install --name {{ django_project_name }} --display-name "{{ django_project_name }}_virtualenv"'
+  when:
+    - django_python_env_type == python_env_type_virtualenv

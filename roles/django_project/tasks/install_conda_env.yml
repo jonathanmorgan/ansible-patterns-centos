@@ -1,0 +1,61 @@
+---
+#------------------------------------------------------------------------------#
+# ==> conda environment
+
+# see if there is a conda environment for django project.
+- name: Check for presence of django project conda env "{{ django_conda_env_path }}"
+  shell: source {{ anaconda_base_bin_path }}/activate && conda info --envs | grep {{ django_conda_env_path }}
+  register: conda_env_exists_check
+  failed_when: conda_env_exists_check.rc == 2
+  when:
+    - django_python_env_type == python_env_type_conda
+
+# To see detailed output
+- debug:
+    var: conda_env_exists_check
+  when:
+    - django_python_env_type == python_env_type_conda
+
+# if no environment, create one.
+- name: Create django project env "{{ django_conda_env }}" if not already present.
+  shell: source {{ anaconda_base_bin_path }}/activate && conda create --{{ django_conda_env_type }} {{ django_conda_env }} python --yes
+  when:
+    - conda_env_exists_check.rc == 1
+    - conda_env_exists_check.stdout == ""
+    - django_python_env_type == python_env_type_conda
+
+#------------------------------------------------------------------------------#
+# ==> install python packages
+
+# CONDA - install django, db package, and other essentials in conda env
+- name: CONDA - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && conda install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --yes
+  when:
+    - django_package_installer == "conda"
+    - django_python_env_type == python_env_type_conda
+
+# ==> Install with pip...?
+
+# PIP - install django, db package, and other essentials in virtualenv
+- name: PIP - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
+
+# install conda env as jupyter kernel
+- name: make {{ django_project_name }} project conda env a system-wide kernel
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python -m ipykernel install --name {{ django_project_name }} --display-name "{{ django_project_name }}_conda_env"
+  when:
+    - django_update_system_jupyter == true
+    - django_python_env_type == python_env_type_conda
+
+- name: make {{ django_project_name }} project conda env a user-space kernel
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && python -m ipykernel install --user --name {{ django_project_name }} --display-name "{{ django_project_name }}_conda_env"
+  when:
+    - django_update_system_jupyter == false
+    - django_python_env_type == python_env_type_conda
+
