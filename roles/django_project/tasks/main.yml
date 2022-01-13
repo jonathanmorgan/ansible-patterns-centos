@@ -54,7 +54,7 @@
     - django_setup_folders == true
     - django_home_folder_exists.stat.exists == false
 
-- name: Change owner of "{{ django_home_folder_path }}" to ansible user ( {{ ansible_user }}; with group ).
+- name: Change owner of "{{ django_home_folder_path }}" to ansible user ( {{ ansible_user }}:{{ server_default_group }} ).
   become: yes
   become_user: root
   become_method: sudo
@@ -62,17 +62,6 @@
   when:
     - django_setup_folders == true
     - django_home_folder_exists.stat.exists == false
-    - ( server_default_group is defined ) and ( server_default_group|length > 0 )
-
-- name: Change owner of "{{ django_home_folder_path }}" to ansible user ( {{ ansible_user }}; NO group ).
-  become: yes
-  become_user: root
-  become_method: sudo
-  shell: chown {{ ansible_user }} {{ django_home_folder_path }}
-  when:
-    - django_setup_folders == true
-    - django_home_folder_exists.stat.exists == false
-    - ( server_default_group is not defined ) or ( server_default_group|length == 0 )
 
 - name: Change group permissions to match user permissions.
   become: yes
