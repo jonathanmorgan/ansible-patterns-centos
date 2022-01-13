@@ -107,6 +107,11 @@ django_project_name: research
 django_project_base_folder_path: "/opt/django/{{ django_project_name }}"
 django_project_folder_path: "{{ django_project_base_folder_path }}/{{ django_project_name }}"
 
+# django python environment type - "conda", "virtualenv" to start
+#python_env_type_conda: "conda"
+#python_env_type_virtualenv: "virtualenv"
+#django_python_env_type: "{{ python_env_type_virtualenv }}"
+
 # django project configuration
 django_virtualenv_name: "{{ django_project_name }}"
 django_virtualenv_python: "{{ python_3_path }}"

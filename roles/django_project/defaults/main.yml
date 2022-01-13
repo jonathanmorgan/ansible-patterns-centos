@@ -29,7 +29,7 @@ django_package_installer: pip
 # django python environment type - "conda", "virtualenv" to start
 python_env_type_conda: "conda"
 python_env_type_virtualenv: "virtualenv"
-django_python_env_type: virtualenv
+django_python_env_type: "{{ python_env_type_virtualenv }}"
 
 # django project virtualenv
 django_virtualenv_from_env: "{{ python_base_path }}"
