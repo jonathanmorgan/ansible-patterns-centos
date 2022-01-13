@@ -101,15 +101,20 @@ jupyterhub_ssl_private_key_path: "{{ server_ssl_private_key_path }}"
 
 #jupyterhub_proxy_command_path: "/usr/local/bin/configurable-http-proxy"
 
-# django project configuration
+# django project basics
 django_project_name: research
+#django_project_base_folder_path: "{{ work_folder }}/django/{{ django_project_name }}"
+django_project_base_folder_path: "/opt/django/{{ django_project_name }}"
+django_project_folder_path: "{{ django_project_base_folder_path }}/{{ django_project_name }}"
+
+# django project configuration
 django_virtualenv_name: "{{ django_project_name }}"
 django_virtualenv_python: "{{ python_3_path }}"
 django_virtualenv_path: "{{ virtualenv_folder }}/{{ django_virtualenv_name }}"
 django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
 django_db_package: "{{ server_pgsql_python_package }}"
-django_project_parent_folder_path: "{{ work_folder }}/django"
-django_project_folder_path: "{{ django_project_parent_folder_path }}/{{ django_project_name }}"
+
+# django project paths
 django_config_folder_path: "{{ django_project_folder_path }}/{{ django_project_name }}"
 django_log_file_path: "{{ log_folder }}/django-{{ django_project_name }}.log"
 django_static_folder_path: "{{ server_webroot_folder }}/static"

@@ -34,31 +34,31 @@
     - server_centos_package_manager == "yum"
 
 #------------------------------------------------------------------------------#
-# ==> django home folder
+# ==> django base folder
 
-# check if django folder is in /apps
-- name: Check if directory {{ django_home_folder_path }} exists
+# check if django folder exists
+- name: Check if directory {{ django_project_base_folder_path }} exists
   stat:
-    path: "{{ django_home_folder_path }}"
+    path: "{{ django_project_base_folder_path }}"
   register: django_home_folder_exists
 
 # if not, create, then update ownership, group, and permissions.
-- name: make sure there is a "{{ django_home_folder_path }}" folder (using ansible "file")
+- name: make sure there is a "{{ django_project_base_folder_path }}" folder (using ansible "file")
   become: yes
   become_user: root
   become_method: sudo
   file:
-    path: "{{ django_home_folder_path }}"
+    path: "{{ django_project_base_folder_path }}"
     state: directory
   when:
     - django_setup_folders == true
     - django_home_folder_exists.stat.exists == false
 
-- name: Change owner of "{{ django_home_folder_path }}" to ansible user ( {{ ansible_user }}:{{ server_default_group }} ).
+- name: Change owner of "{{ django_project_base_folder_path }}" to ansible user ( {{ ansible_user }}:{{ server_default_group }} ).
   become: yes
   become_user: root
   become_method: sudo
-  shell: chown {{ ansible_user }}:{{ server_default_group }} {{ django_home_folder_path }}
+  shell: chown {{ ansible_user }}:{{ server_default_group }} {{ django_project_base_folder_path }}
   when:
     - django_setup_folders == true
     - django_home_folder_exists.stat.exists == false
@@ -67,7 +67,7 @@
   become: yes
   become_user: root
   become_method: sudo
-  shell: chmod g=u {{ django_home_folder_path }}
+  shell: chmod g=u {{ django_project_base_folder_path }}
   when:
     - django_setup_folders == true
     - django_home_folder_exists.stat.exists == false
@@ -76,7 +76,7 @@
   become: yes
   become_user: root
   become_method: sudo
-  shell: chmod g+s {{ django_home_folder_path }}
+  shell: chmod g+s {{ django_project_base_folder_path }}
   when:
     - django_setup_folders == true
     - django_home_folder_exists.stat.exists == false
@@ -85,15 +85,15 @@
 # ==> django project folder
 
 # check if django project folder exists
-- name: Check if directory {{ django_project_home_path }} exists
+- name: Check if directory {{ django_project_folder_path }} exists
   stat:
-    path: "{{ django_project_home_path }}"
+    path: "{{ django_project_folder_path }}"
   register: django_project_folder_exists
 
 # create project folder
-- name: make sure there is a "{{ django_project_home_path }}" folder (using ansible "file")
+- name: make sure there is a "{{ django_project_folder_path }}" folder (using ansible "file")
   file:
-    path: "{{ django_project_home_path }}"
+    path: "{{ django_project_folder_path }}"
     state: directory
   when:
     - django_project_folder_exists.stat.exists == false
@@ -116,10 +116,10 @@
 #------------------------------------------------------------------------------#
 # ==> actual django project
 
-# create django project parent folder {{ django_project_parent_folder_path }}
-- name: create django project parent folder {{ django_project_parent_folder_path }}
+# create django project parent folder {{ django_project_base_folder_path }}
+- name: create django project parent folder {{ django_project_base_folder_path }}
   file:
-    path: "{{ django_project_parent_folder_path }}"
+    path: "{{ django_project_base_folder_path }}"
     state: directory
 
 # check if django project already there.
@@ -132,7 +132,7 @@
 - name: create django project (virtualenv)
   shell: "{{ django_virtualenv_bin_path }}/{{django_admin_command}} startproject {{ django_project_name }}"
   args:
-    chdir: "{{ django_project_parent_folder_path }}/"
+    chdir: "{{ django_project_base_folder_path }}/"
   when:
     - django_project.stat.exists == False
     - django_python_env_type == python_env_type_virtualenv

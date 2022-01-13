@@ -53,5 +53,5 @@
   #  path: "{{ django_project_folder_path }}"
   #  mode: "{{ django_project_folder_mode }}"
   #  recurse: yes
-  shell: find {{ django_project_parent_folder_path }} -type d -exec chmod {{ django_project_folder_mode }} {} \;
+  shell: find {{ django_project_base_folder_path }} -type d -exec chmod {{ django_project_folder_mode }} {} \;
   when: ( django_project_folder_mode is defined ) and ( django_project_folder_mode > 0 )
