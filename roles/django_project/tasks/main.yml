@@ -85,18 +85,18 @@
 # ==> django project folder
 
 # check if django project folder exists
-- name: Check if directory {{ django_project_folder_path }} exists
-  stat:
-    path: "{{ django_project_folder_path }}"
-  register: django_project_folder_exists
+#- name: Check if directory {{ django_project_folder_path }} exists
+#  stat:
+#    path: "{{ django_project_folder_path }}"
+#  register: django_project_folder_exists
 
 # create project folder
-- name: make sure there is a "{{ django_project_folder_path }}" folder (using ansible "file")
-  file:
-    path: "{{ django_project_folder_path }}"
-    state: directory
-  when:
-    - django_project_folder_exists.stat.exists == false
+#- name: make sure there is a "{{ django_project_folder_path }}" folder (using ansible "file")
+#  file:
+#    path: "{{ django_project_folder_path }}"
+#    state: directory
+#  when:
+#    - django_project_folder_exists.stat.exists == false
 
 #===============================================================================
 # ==> install python environment.
@@ -116,8 +116,8 @@
 #------------------------------------------------------------------------------#
 # ==> actual django project
 
-# create django project parent folder {{ django_project_base_folder_path }}
-- name: create django project parent folder {{ django_project_base_folder_path }}
+# create django project base folder {{ django_project_base_folder_path }}
+- name: create django project base folder {{ django_project_base_folder_path }}
   file:
     path: "{{ django_project_base_folder_path }}"
     state: directory
@@ -137,14 +137,13 @@
     - django_project.stat.exists == False
     - django_python_env_type == python_env_type_virtualenv
 
-# check if superuser user exists, if not, create user.
 - name: create django project (conda)
   shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{django_admin_command}} startproject {{ django_project_name }}
   args:
-    chdir: "{{ django_project_folder_path }}/"
+    chdir: "{{ django_project_base_folder_path }}/"
   when:
+    - django_project.stat.exists == False
     - django_python_env_type == python_env_type_conda
-
 
 # put settings.py in place
 - name: put settings.py in place
