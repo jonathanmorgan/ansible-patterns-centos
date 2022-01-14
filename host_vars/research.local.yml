@@ -46,6 +46,10 @@ virtualenv_project_folder: "{{ work_folder }}/vew-projects"
 # miniconda configuration
 #miniconda_python_version: "3.9"
 
+#=========================================================#
+# database configuration
+#=========================================================#
+
 # postgresql configuration
 # ubuntu 16.04
 #server_pgsql_version: "9.5"
@@ -74,7 +78,10 @@ server_mysql_admin_user: "{{ ansible_user }}"
 server_mysql_admin_password: "{{ ansible_become_password }}"
 server_mysql_version: "57" # or "80"
 
+#=========================================================#
 # R configuration
+#=========================================================#
+
 #r_apt_deb_ubuntu_version_path: "{{ server_ubuntu_version_code_name }}-cran{{ r_version_number }}"
 r_apt_deb_ubuntu_version_path: "{{ server_ubuntu_version_code_name }}"
 # R 4.0:
@@ -87,7 +94,10 @@ r_marutter_version_number: "4.0"
 # RStudio server configuration
 #rstudio_version: 1.3.959
 
+#=========================================================#
 # Jupyterhub configuration
+#=========================================================#
+
 #jupyterhub_config_folder: /etc/jupyterhub
 #jupyterhub_pip_executable: "{{ miniconda3_pip_executable }}"
 # to generate: openssl rand -hex 32
@@ -101,29 +111,51 @@ jupyterhub_ssl_private_key_path: "{{ server_ssl_private_key_path }}"
 
 #jupyterhub_proxy_command_path: "/usr/local/bin/configurable-http-proxy"
 
-# django project basics
+#=========================================================#
+# django project configuration
+#=========================================================#
+
+# ==> django project basics
 django_project_name: research
 #django_project_base_folder_path: "{{ work_folder }}/django/{{ django_project_name }}"
 django_project_base_folder_path: "/opt/django/{{ django_project_name }}"
 django_project_folder_path: "{{ django_project_base_folder_path }}/{{ django_project_name }}"
+django_db_package: "{{ server_pgsql_python_package }}"
 
-# django python environment type - "conda", "virtualenv" to start
+# ==> django python environment type - "conda", "virtualenv" to start
 #python_env_type_conda: "conda"
 #python_env_type_virtualenv: "virtualenv"
 #django_python_env_type: "{{ python_env_type_virtualenv }}"
 
-# django project configuration
-django_virtualenv_name: "{{ django_project_name }}"
-django_virtualenv_python: "{{ python_3_path }}"
-django_virtualenv_path: "{{ virtualenv_folder }}/{{ django_virtualenv_name }}"
-django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
-django_db_package: "{{ server_pgsql_python_package }}"
+# ==> django project virtualenv
+#django_virtualenv_from_env: "{{ python_base_path }}"
+#django_virtualenv_from_env_bin: "{{ python_base_bin_path }}"
+#django_virtualenv_from_env_python: "{{ python_base_python_executable }}"  # python executable where virtualenv and virtualenvwrapper are installed, used to create virtualenv.
+#django_virtualenv_home_path: "{{ virtualenv_folder }}"
+#django_virtualenv_name: "{{ django_project_name }}"
+#django_virtualenv_path: "{{ django_virtualenv_home_path }}/{{ django_virtualenv_name }}"
+#django_virtualenv_bin_path: "{{ django_virtualenv_path }}/bin"
+#django_virtualenv_python_version: "{{ python_base_version }}"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
 
-# django project paths
-django_config_folder_path: "{{ django_project_folder_path }}/{{ django_project_name }}"
-django_log_file_path: "{{ log_folder }}/django-{{ django_project_name }}.log"
-django_static_folder_path: "{{ server_webroot_folder }}/static"
-django_settings_import: "{{ django_project_name }}.settings"
+# ==> django project conda environment
+#django_conda_from_env: "{{ python_base_path }}"
+#django_conda_from_env_bin: "{{ python_base_bin_path }}"
+#django_conda_from_env_python: "{{ python_base_python_executable }}"  # python executable where conda is installed, used to create conda environment.
+#django_conda_env_home_path: "{{ django_project_base_folder_path }}"
+#django_conda_env_name: "conda_env"
+#django_conda_env_path: "{{ django_conda_env_home_path }}/{{ django_conda_env_name }}"
+#django_conda_env_bin_path: "{{ django_conda_env_path }}/bin"
+#django_conda_env_python_version: "{{ python_base_version }}"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
+#django_conda_env_python_install_version: "{{ django_conda_env_python_version }}"
+#django_conda_env_init_packages: "python={{ django_conda_env_python_install_version }}"
+##django_conda_env_init_packages: ""
+
+# ==> django project paths
+#django_config_folder_path: "{{ django_project_folder_path }}/{{ django_project_name }}"
+#django_logs_folder_path: "{{ django_project_base_folder_path }}/logs"
+#django_log_file_path: "{{ django_logs_folder_path }}/django-{{ django_project_name }}.log"
+#django_static_folder_path: "{{ server_webroot_folder }}/static"
+#django_settings_import: "{{ django_project_name }}.settings"
 #django_project_folder_mode: "777"
 django_db_name: "{{ django_project_name }}"
 django_db_username: "django_user"

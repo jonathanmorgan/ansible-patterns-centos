@@ -18,7 +18,7 @@
 
 # if no environment, create one.
 - name: Create django project env "{{ django_conda_env }}" if not already present.
-  shell: source {{ anaconda_base_bin_path }}/activate && conda create --{{ django_conda_env_type }} {{ django_conda_env }} python --yes
+  shell: source {{ anaconda_base_bin_path }}/activate && conda create --{{ django_conda_env_type }} {{ django_conda_env }} {{ django_conda_env_init_packages }} --yes
   when:
     - conda_env_exists_check.rc == 1
     - conda_env_exists_check.stdout == ""

@@ -31,7 +31,8 @@ python_env_type = ""
 django_project_name = ""
 path_to_django_project_parent = ""
 virtualenv_python3 = ""
-python_3_version = ""
+virtualenv_python_version = ""
+conda_env_python_version = ""
 temp_path = None
 
 # declare variables - anaconda
@@ -46,7 +47,8 @@ django_project_name = "{{ django_project_name }}"
 virtualenv_folder_path = "{{ django_virtualenv_home_path }}"
 path_to_django_project_parent = "{{ django_project_base_folder_path }}"
 virtualenv_python3 = "{{ django_virtualenv_name }}"
-python_3_version = "{{ django_virtualenv_python_version }}"
+virtualenv_python_version = "{{ django_virtualenv_python_version }}"
+conda_env_python_version = "{{ django_conda_env_python_version }}"
 
 # Add the app's directory to the PYTHONPATH
 temp_path = "{}/{}".format( path_to_django_project_parent, django_project_name )
@@ -61,7 +63,7 @@ os.environ.setdefault( "DJANGO_SETTINGS_MODULE", "{}.settings".format( django_pr
 if ( python_env_type == python_env_type_virtualenv ):
 
     # Add the site-packages of the virtualenv
-    temp_path = virtualenv_folder_path + "/" + virtualenv_python3 + "/lib/python" + python_3_version + "/site-packages"
+    temp_path = virtualenv_folder_path + "/" + virtualenv_python3 + "/lib/python" + virtualenv_python_version + "/site-packages"
     site.addsitedir( temp_path )
 
     # Activate environment?
@@ -82,7 +84,7 @@ if ( python_env_type == python_env_type_virtualenv ):
 elif ( python_env_type == python_env_type_conda )
 
     # conda env
-    temp_path = conda_env_home_path + "/lib/python" + python_3_version + "/site-packages"
+    temp_path = conda_env_home_path + "/lib/python" + conda_env_python_version + "/site-packages"
     site.addsitedir( temp_path )
 
     # Activate your conda env? I don't think you need to...

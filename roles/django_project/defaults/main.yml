@@ -49,7 +49,10 @@ django_conda_env_home_path: "{{ django_project_base_folder_path }}"
 django_conda_env_name: "conda_env"
 django_conda_env_path: "{{ django_conda_env_home_path }}/{{ django_conda_env_name }}"
 django_conda_env_bin_path: "{{ django_conda_env_path }}/bin"
-django_conda_env_python_version: "3.8"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
+django_conda_env_python_version: "{{ python_base_version }}"  # major.minor, no worry about part after that (so for 3.7.7, just use 3.7)
+django_conda_env_python_install_version: "{{ django_conda_env_python_version }}"
+django_conda_env_init_packages: "python={{ django_conda_env_python_install_version }}"
+#django_conda_env_init_packages: ""
 
 # conda env meta-information
 django_conda_env_type: "prefix"  # "prefix" (for a path) or "name" (for a simple name)
