@@ -127,6 +127,10 @@ django_db_package: "{{ server_pgsql_python_package }}"
 #python_env_type_virtualenv: "virtualenv"
 #django_python_env_type: "{{ python_env_type_virtualenv }}"
 
+# for older versions of django, it is "django-admin.py" (default). For newer (post-3.2?) it is just "django-admin".
+#django_admin_command: "django-admin.py"
+#django_admin_command: "django-admin"
+
 # ==> django project virtualenv
 #django_virtualenv_from_env: "{{ python_base_path }}"
 #django_virtualenv_from_env_bin: "{{ python_base_bin_path }}"
@@ -165,6 +169,12 @@ django_db_port: "5432"
 django_superuser_username: "{{ ansible_user }}"
 django_superuser_password: "{{ ansible_become_password }}"
 django_superuser_email: ""
+
+# ==> django setup control variables
+#django_setup_folders: true
+#django_install_os_packages: true
+#django_configure_apache: true
+#django_update_system_jupyter: true
 
 # phd work
 #include_phd_work: false

@@ -18,37 +18,61 @@ def application(environ, start_response):
     return ["killed"]
 '''
 
+#==============================================================================#
 # imports
+#==============================================================================#
+
 import os
 import sys
 import site
 import six
 
+#==============================================================================#
 # declare variables
+#==============================================================================#
+
 python_env_type_conda = "{{ python_env_type_conda }}"
 python_env_type_virtualenv = "{{ python_env_type_virtualenv }}"
-python_env_type = ""
-django_project_name = ""
-path_to_django_project_parent = ""
-virtualenv_python3 = ""
-virtualenv_python_version = ""
-conda_env_python_version = ""
+python_env_type = None
+django_project_name = None
+path_to_django_project_parent = None
 temp_path = None
 
+# declare variables - virtualenv
+virtualenv_folder_path = None
+virtualenv_python3 = None
+virtualenv_python_version = None
+
 # declare variables - anaconda
-anaconda_base_bin_path = ""
+anaconda_base_bin_path = None
+conda_env_python_version = None
 conda_env_home_path = None
 conda_env_activate_command = None
 activate_code = None
 
+#==============================================================================#
 # configure
+#==============================================================================#
+
 python_env_type = "{{ django_python_env_type }}"
 django_project_name = "{{ django_project_name }}"
-virtualenv_folder_path = "{{ django_virtualenv_home_path }}"
 path_to_django_project_parent = "{{ django_project_base_folder_path }}"
+
+# configure - virtualenv
+virtualenv_folder_path = "{{ django_virtualenv_home_path }}"
 virtualenv_python3 = "{{ django_virtualenv_name }}"
 virtualenv_python_version = "{{ django_virtualenv_python_version }}"
+
+# configure - conda environment
+anaconda_base_bin_path = "{{ django_conda_from_env_bin }}"
 conda_env_python_version = "{{ django_conda_env_python_version }}"
+conda_env_home_path = "{{ django_conda_env_path }}"
+conda_env_activate_command = None
+activate_code = None
+
+#==============================================================================#
+# do wsgi stuff
+#==============================================================================#
 
 # Add the app's directory to the PYTHONPATH
 temp_path = "{}/{}".format( path_to_django_project_parent, django_project_name )

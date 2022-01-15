@@ -1,0 +1,22 @@
+# django python environment type - "conda", "virtualenv" to start
+python_env_type_conda: "conda"
+python_env_type_virtualenv: "virtualenv"
+django_python_env_type: "{{ python_env_type_virtualenv }}"
+
+# virtualenv stuff
+ansible_user_home_folder: "/home/{{ ansible_user }}"
+virtualenv_parent_folder: "{{ ansible_user_home_folder }}"
+virtualenv_folder: "{{ virtualenv_parent_folder }}/.virtualenvs"
+django_project_name: research
+django_virtualenv_home_path: "{{ virtualenv_folder }}"
+django_virtualenv_name: "{{ django_project_name }}"
+django_virtualenv_path: "{{ django_virtualenv_home_path }}/{{ django_virtualenv_name }}"
+
+# django project locations configuration
+django_config_folder_path: "{{ django_project_folder_path }}/{{ django_project_name }}"
+# old way - use a user-specific path - new way, keep logs with django project.
+#django_logs_folder_path: "{{ log_folder }}"
+django_logs_folder_path: "{{ django_project_base_folder_path }}/logs"
+django_log_file_path: "{{ django_logs_folder_path }}/django-{{ django_project_name }}.log"
+django_static_folder_path: "{{ server_webroot_folder }}/static"
+django_settings_import: "{{ django_project_name }}.settings"
