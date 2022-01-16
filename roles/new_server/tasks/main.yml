@@ -67,6 +67,7 @@
       - openssh-clients
       - openssh-server
       - dkms
+      - kernel-devel
     state: present
   when: server_centos_package_manager == "dnf"
 
@@ -78,6 +79,7 @@
       - openssh-clients
       - openssh-server
       - dkms
+      - kernel-devel
     state: present
   when: server_centos_package_manager == "yum"
 
