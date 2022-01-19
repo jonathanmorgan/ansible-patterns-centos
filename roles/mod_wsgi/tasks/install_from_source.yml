@@ -73,12 +73,12 @@
 # More details on LD_RUN_PATH here: https://stackoverflow.com/questions/20913125/mod-wsgi-for-correct-version-of-python3
 
 # stop apache
-- name: stop httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: stopped
+#- name: stop httpd
+#  become: yes
+#  become_user: root
+#  service:
+#    name: httpd
+#    state: stopped
 
 # make install
 - name: run make install in source directory ({{ mod_wsgi_source_path }}).
@@ -87,6 +87,7 @@
   shell: "make --directory={{ mod_wsgi_source_path }} install"
   args:
     chdir: "{{ mod_wsgi_source_path }}"
+  notify: restart httpd
 
 #------------------------------------------------------------------------------#
 # add mod_wsgi to apache
@@ -106,9 +107,9 @@
 # start apache
 
 # start apache
-- name: start httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: started
+#- name: start httpd
+#  become: yes
+#  become_user: root
+#  service:
+#    name: httpd
+#    state: started

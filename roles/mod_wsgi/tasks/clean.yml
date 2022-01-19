@@ -2,12 +2,12 @@
 # move aside any existing mod_wsgi.so and wsgi.conf
 
 # stop apache
-- name: stop httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: stopped
+#- name: stop httpd
+#  become: yes
+#  become_user: root
+#  service:
+#    name: httpd
+#    state: stopped
 
 # does mod_wsgi module already exist?
 - name: Ansible check if mod_wsgi module so file {{ mod_wsgi_so_path }} exists
@@ -47,7 +47,7 @@
     - mod_wsgi_so_exists.stat.exists == true
 
 # delete mod_wsgi.so.
-- name: Delete {{ mod_wsgi_so_path }}.
+- name: Delete wsgi ".so" file @ {{ mod_wsgi_so_path }}.
   become: yes
   become_user: root
   file:
@@ -55,6 +55,7 @@
     state: absent
   when:
     - mod_wsgi_so_exists.stat.exists == true
+  notify: restart httpd
 
 # copy wsgi.conf to archive folder.
 - name: Copy {{ wsgi_conf_file_path }} to ~/archive/{{ ansible_date_time.iso8601_basic_short }}.
@@ -66,7 +67,7 @@
     - wsgi_conf_exists.stat.exists == true
 
 # delete wsgi.conf.
-- name: Delete {{ wsgi_conf_file_path }}.
+- name: Delete wsgi conf file @ {{ wsgi_conf_file_path }}.
   become: yes
   become_user: root
   file:
@@ -74,6 +75,7 @@
     state: absent
   when:
     - wsgi_conf_exists.stat.exists == true
+  notify: restart httpd
 
 # clear existing source directory if present.
 - name: Ansible check if mod_wsgi source folder {{ mod_wsgi_source_path }} exists.
@@ -91,9 +93,9 @@
     - mod_wsgi_source_exists.stat.exists == true
 
 # start apache
-- name: start httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: started
+#- name: start httpd
+#  become: yes
+#  become_user: root
+#  service:
+#    name: httpd
+#    state: started

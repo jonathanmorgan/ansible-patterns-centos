@@ -43,9 +43,12 @@ paths:
 
     - restart apache.
     - touch wsgi.py to reload django application.
-    - worked?
+    - worked.
 
 - `conda install -c conda-forge mod_wsgi` in base, app uses virtualenv
+
+    - no dice. Package is out of date and broken.
+
 - `conda install -c conda-forge mod_wsgi` in base, app uses conda env
 
-    - no dice.
+    - no dice. Package is out of date and broken.

@@ -45,3 +45,7 @@ wsgi_conf_file_path: "{{ httpd_mod_conf_folder }}/{{ wsgi_conf_file_name }}"
 #=========================================================#
 
 mod_wsgi_pip_so_file_path: "{{ python_home_path }}/lib/python{{ miniconda_python_version }}/site-packages/mod_wsgi/server/mod_wsgi-py{{ miniconda_python_version_no_dot }}.cpython-{{ miniconda_python_version_no_dot }}-x86_64-linux-gnu.so"
+
+# install in a conda env, not the base anaconda install?
+mod_wsgi_install_conda_env_path: ""
+mod_wsgi_install_conda_env_so_file_path: "{{ mod_wsgi_install_conda_env_path }}/lib/python{{ miniconda_python_version }}/site-packages/mod_wsgi/server/mod_wsgi-py{{ miniconda_python_version_no_dot }}.cpython-{{ miniconda_python_version_no_dot }}-x86_64-linux-gnu.so"

@@ -1,6 +1,7 @@
 ---
 #==============================================================================#
-# Install mod_wsgi using pip.
+# Install mod_wsgi using conda.
+# - NOTE: don't do this - the conda-forge package is out of date and broken.
 #==============================================================================#
 
 # note: assuming that base python is anaconda.
@@ -8,21 +9,31 @@
 #------------------------------------------------------------------------------#
 # compile and install mod_wsgi
 
-# install mod_wsgi package in base python environment using pip.
-- name: install mod_wsgi in base anaconda python environment ( {{ python_home_path }} ) using pip.
+# install mod_wsgi package in base python environment using conda.
+- name: install mod_wsgi in base anaconda python environment ( {{ python_home_path }} ) using conda.
   shell: source {{ python_bin_folder_path }}/activate && conda install -c conda-forge mod_wsgi --yes
   #become_user: root
   #become_method: sudo
   when:
     - mod_wsgi_install_type == mod_wsgi_install_type_conda
+    - not mod_wsgi_install_conda_env_path
+
+# install mod_wsgi package in other conda environment using pip.
+- name: install mod_wsgi in anaconda python environment ( {{ mod_wsgi_install_conda_env_path }} ) using conda.
+  #become: yes
+  #become_user: root
+  shell: source {{ python_bin_folder_path }}/activate {{ mod_wsgi_install_conda_env_path }} && conda install -c conda-forge mod_wsgi --yes
+  when:
+    - mod_wsgi_install_type == mod_wsgi_install_type_pip
+    - mod_wsgi_install_conda_env_path
 
 # stop apache
-- name: stop httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: stopped
+#- name: stop httpd
+#  become: yes
+#  become_user: root
+#  service:
+#    name: httpd
+#    state: stopped
 
 # copy resulting ".so" file to {{ mod_wsgi_so_path }}
 - name: Copy {{ mod_wsgi_pip_so_file_path }} to {{ mod_wsgi_so_path }}.
@@ -32,6 +43,21 @@
     src: "{{ mod_wsgi_pip_so_file_path }}"
     dest: "{{ mod_wsgi_so_path }}"
     remote_src: yes
+  when:
+    - not mod_wsgi_install_conda_env_path
+  notify: restart httpd
+
+# copy resulting ".so" file to {{ mod_wsgi_so_path }}
+- name: Copy {{ mod_wsgi_install_conda_env_so_file_path }} from conda env to {{ mod_wsgi_so_path }}.
+  become: yes
+  become_user: root
+  copy:
+    src: "{{ mod_wsgi_install_conda_env_so_file_path }}"
+    dest: "{{ mod_wsgi_so_path }}"
+    remote_src: yes
+  when:
+    - mod_wsgi_install_conda_env_path
+  notify: restart httpd
 
 #------------------------------------------------------------------------------#
 # add mod_wsgi to apache
@@ -51,9 +77,9 @@
 # start apache
 
 # start apache
-- name: start httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: started
+#- name: start httpd
+#  become: yes
+#  become_user: root
+#  service:
+#    name: httpd
+#    state: started
