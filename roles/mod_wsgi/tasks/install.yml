@@ -12,112 +12,20 @@
 - name: clean up old install of mod_wsgi
   include: clean.yml
 
-#------------------------------------------------------------------------------#
-# download mod_wsgi
+#==============================================================================#
+# ==> install mod_wsgi...
 
-# make sure base folder exists.
-- name: make sure there is a "{{ mod_wsgi_base_path }}" folder
-  file:
-    path: "{{ mod_wsgi_base_path }}"
-    state: directory
-
-# make sure work folder exists.
-- name: make sure there is a "{{ mod_wsgi_work_path }}" folder
-  file:
-    path: "{{ mod_wsgi_work_path }}"
-    state: directory
-
-# does install file already exist?
-- name: Ansible check if install file already downloaded to {{ ansible_user_home_folder }}/Downloads/{{ mod_wsgi_version }}.tar.gz.
-  stat:
-    path: "{{ mod_wsgi_source_tarball_path }}"
-  register: mod_wsgi_source_tarball_exists
-
-# - download latest mod_wsgi source: https://github.com/GrahamDumpleton/mod_wsgi/releases
-- name: Download latest mod_wsgi source tarball
-  get_url:
-    url: "https://github.com/GrahamDumpleton/mod_wsgi/archive/{{ mod_wsgi_version }}.tar.gz"
-    dest: "{{ mod_wsgi_source_tarball_path }}"
-    mode: '0755'
+- name: Install mod_wsgi from source.
+  include: install_from_source.yml
   when:
-    - mod_wsgi_source_tarball_exists.stat.exists == false
+    - mod_wsgi_install_type == mod_wsgi_install_type_source
 
-#------------------------------------------------------------------------------#
-# compile and install mod_wsgi
-
-# clear existing source directory if present.
-- name: Ansible check if mod_wsgi source folder {{ mod_wsgi_source_path }} exists.
-  stat:
-    path: "{{ mod_wsgi_source_path }}"
-  register: mod_wsgi_source_exists
-
-- name: Remove mod_wsgi source folder {{ mod_wsgi_source_path }}
-  become: yes
-  become_user: root
-  file:
-    path: "{{ mod_wsgi_source_path }}"
-    state: absent
+- name: Install mod_wsgi using pip.
+  include: install_with_pip.yml
   when:
-    - mod_wsgi_source_exists.stat.exists == true
+    - mod_wsgi_install_type == mod_wsgi_install_type_pip
 
-# untar source tarball
-- name: untar mod_wsgi source tarball {{ mod_wsgi_source_tarball_path }}
-  unarchive:
-    src: "{{ mod_wsgi_source_tarball_path }}"
-    dest: "{{ mod_wsgi_work_path }}"
-    remote_src: yes
-
-# configure
-- name: run configure --with-python={{ mod_wsgi_python_bin_path }}
-  shell: "./configure --with-python={{ mod_wsgi_python_bin_path }}"
-  args:
-    chdir: "{{ mod_wsgi_source_path }}"
-
-# make
-- name: run make in source directory ({{ mod_wsgi_source_path }}).
-  shell: "LD_RUN_PATH={{ python_lib_folder_path }} make --directory={{ mod_wsgi_source_path }}"
-  args:
-    chdir: "{{ mod_wsgi_source_path }}"
-
-# More details on LD_RUN_PATH here: https://stackoverflow.com/questions/20913125/mod-wsgi-for-correct-version-of-python3
-
-# stop apache
-- name: stop httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: stopped
-
-# make install
-- name: run make install in source directory ({{ mod_wsgi_source_path }}).
-  become: yes
-  become_user: root
-  shell: "make --directory={{ mod_wsgi_source_path }} install"
-  args:
-    chdir: "{{ mod_wsgi_source_path }}"
-
-#------------------------------------------------------------------------------#
-# add mod_wsgi to apache
-
-# place mod_wsgi conf in {{ wsgi_conf_file_path }}
-- name: place mod_wsgi conf in {{ wsgi_conf_file_path }}
-  become: yes
-  become_user: root
-  template:
-    src: wsgi.conf.j2
-    dest: "{{ wsgi_conf_file_path }}"
-  notify: restart httpd
-
-# More details on needing WSGIPythonHome: https://groups.google.com/forum/#!topic/modwsgi/1oEuIHDiCbM
-
-#------------------------------------------------------------------------------#
-# start apache
-
-# start apache
-- name: start httpd
-  become: yes
-  become_user: root
-  service:
-    name: httpd
-    state: started
+- name: Install mod_wsgi using conda.
+  include: install_with_conda.yml
+  when:
+    - mod_wsgi_install_type == mod_wsgi_install_type_conda
