@@ -10,18 +10,40 @@
     repo: https://github.com/jonathanmorgan/python_utilities.git
     dest: "{{ django_project_folder_path }}/python_utilities"
 
-# install python_utilities requirements
-- name: install python_utilities requirements
+# install python_utilities requirements (virtualenv)
+- name: (virtualenv) install python_utilities requirements
   pip:
     requirements: "{{ django_project_folder_path }}/python_utilities/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
   notify: touch wsgi.py
 
-# install python_utilities potgresql-specific requirements
-- name: install python_utilities potgresql-specific requirements
+# install python_utilities requirements (conda env)
+- name: (conda env) install python_utilities requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/python_utilities/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
+  notify: touch wsgi.py
+
+# install python_utilities postgresql-specific requirements (virtualenv)
+- name: (virtualenv) install python_utilities postgresql-specific requirements
   pip:
     requirements: "{{ django_project_folder_path }}/python_utilities/requirements_pgsql.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install python_utilities postgresql-specific requirements (conda env)
+- name: (conda env) install python_utilities postgresql-specific requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/python_utilities/requirements_pgsql.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> prerequisite: django_config
@@ -39,11 +61,22 @@
     line: INSTALLED_APPS.append( 'django_config.apps.Django_ConfigConfig' )
   notify: touch wsgi.py
 
-# install django_config requirements
-- name: install django_config requirements
+# install django_config requirements (virtualenv)
+- name: (virtualenv) install django_config requirements
   pip:
     requirements: "{{ django_project_folder_path }}/django_config/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install django_config requirements (conda env)
+- name: (conda env) install django_config requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/django_config/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> prerequisite: django_messages
@@ -61,11 +94,22 @@
     line: INSTALLED_APPS.append( 'django_messages.apps.DjangoMessagesConfig' )
   notify: touch wsgi.py
 
-# install django_messages requirements
-- name: install django_messages requirements
+# install django_messages requirements (virtualenv)
+- name: (virtualenv) install django_messages requirements
   pip:
     requirements: "{{ django_project_folder_path }}/django_messages/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install django_messages requirements (conda env)
+- name: (conda env) install django_messages requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/django_messages/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> context
@@ -97,11 +141,22 @@
     line: urlpatterns.append( path( 'context/', include( 'context.urls' ) ) )
   notify: touch wsgi.py
 
-# install context requirements
-- name: install context requirements
+# install context requirements (virtualenv)
+- name: (virtualenv) install context requirements
   pip:
     requirements: "{{ django_project_folder_path }}/context/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install context requirements (conda env)
+- name: (conda env) install context requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/context/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # add dal_select2 to front of INSTALLED_APPS 
@@ -140,11 +195,22 @@
     line: urlpatterns.append( path( 'context/text/', include( 'context_text.urls' ) ) )
   notify: touch wsgi.py
 
-# install context_text requirements
-- name: install context_text requirements
+# install context_text requirements (virtualenv)
+- name: (virtualenv) install context_text requirements
   pip:
     requirements: "{{ django_project_folder_path }}/context_text/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install context_text requirements (conda env)
+- name: (conda env) install context_text requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/context_text/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> context_analysis
@@ -169,11 +235,22 @@
     line: urlpatterns.append( path( 'context/analysis/', include( 'context_analysis.urls' ) ) )
   notify: touch wsgi.py
 
-# install context_analysis requirements
-- name: install context_analysis requirements
+# install context_analysis requirements (virtualenv)
+- name: (virtualenv) install context_analysis requirements
   pip:
     requirements: "{{ django_project_folder_path }}/context_analysis/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install context_analysis requirements (conda env)
+- name: (conda env) install context_analysis requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/context_analysis/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> context_data
@@ -198,11 +275,22 @@
     line: urlpatterns.append( path( 'context/data/', include( 'context_data.urls' ) ) )
   notify: touch wsgi.py
 
-# install context_data requirements
-- name: install context_data requirements
+# install context_data requirements (virtualenv)
+- name: (virtualenv) install context_data requirements
   pip:
     requirements: "{{ django_project_folder_path }}/context_data/requirements.txt"
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+# install context_data requirements (conda env)
+- name: (conda env) install context_data requirements
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install -r {{ django_project_folder_path }}/context_data/requirements.txt --no-input
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> phd_work
@@ -221,8 +309,8 @@
     dest: "{{ django_project_folder_path }}/work/phd_work"
   when: ( include_phd_work is defined ) and ( include_phd_work|bool == True )
 
-# ==> remove requirements we have source for: django-basic-config, django-basic-messages, python-utilities-jsm
-- name: uninstall requirements django-basic-config, django-basic-messages, python-utilities-jsm (we have source for them)
+# ==> (virtualenv) remove requirements we have source for: django-basic-config, django-basic-messages, python-utilities-jsm
+- name: (virtualenv) uninstall requirements django-basic-config, django-basic-messages, python-utilities-jsm (we have source for them)
   pip:
     virtualenv: "{{ django_virtualenv_path }}"
     state: absent
@@ -230,22 +318,49 @@
       - django-basic-config
       - django-basic-messages
       - python-utilities-jsm
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+- name: (conda env) uninstall requirements django-basic-config, django-basic-messages, python-utilities-jsm (we have source for them)
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip uninstall django-basic-config django-basic-messages python-utilities-jsm --yes
+  when:
+    - django_package_installer == "pip"
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # ==> update the database
-- name: run `python manage.py migrate`
+- name: (virtualenv) run `python manage.py migrate`
   django_manage:
     app_path: "{{ django_project_folder_path }}"
     command: migrate
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+- name: (conda env) run `python manage.py migrate`
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/python {{ django_project_folder_path }}/manage.py migrate
+  when:
+    - django_python_env_type == python_env_type_conda
   notify: touch wsgi.py
 
 # collect static
-- name: run `python manage.py collectstatic`
+- name: (virtualenv) run `python manage.py collectstatic`
   django_manage:
     app_path: "{{ django_project_folder_path }}"
     command: collectstatic --noinput
     virtualenv: "{{ django_virtualenv_path }}"
+  when:
+    - django_python_env_type == python_env_type_virtualenv
+  notify: touch wsgi.py
+
+- name: (conda env) run `python manage.py collectstatic`
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/python {{ django_project_folder_path }}/manage.py collectstatic --noinput
+  when:
+    - django_python_env_type == python_env_type_conda
+  notify: touch wsgi.py
 
 # ==> update settings to include login variables
 

@@ -29,7 +29,7 @@
 
 # CONDA - install django, db package, and other essentials in conda env
 - name: CONDA - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && conda install django {{ django_db_python_package }} ipython ipykernel django-ajax-selects django-taggit beautifulsoup4 requests w3lib --yes
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && conda install 'django{{ django_install_version_filter }}' {{ django_db_python_package }} ipython ipykernel django-autocomplete-light django-taggit beautifulsoup4 requests w3lib --yes
   when:
     - django_package_installer == "conda"
     - django_python_env_type == python_env_type_conda
@@ -38,7 +38,7 @@
 
 # PIP - install django, db package, and other essentials in virtualenv
 - name: PIP - install django and db package in conda env {{ django_conda_env }} ( type = {{ django_conda_env_type }} )
-  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install django {{ django_db_python_package }} ipython ipykernel django-autocomplete-light django-taggit beautifulsoup4 requests w3lib --no-input
+  shell: source {{ anaconda_base_bin_path }}/activate {{ django_conda_env }} && {{ django_conda_env_bin_path }}/pip install 'django{{ django_install_version_filter }}' {{ django_db_python_package }} ipython ipykernel django-autocomplete-light django-taggit beautifulsoup4 requests w3lib --no-input
   when:
     - django_package_installer == "pip"
     - django_python_env_type == python_env_type_conda

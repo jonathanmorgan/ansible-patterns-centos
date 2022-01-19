@@ -20,6 +20,8 @@ postgresql_conda_env_path: /home/jonathanmorgan/.conda/envs/postgresql_service
 django_project_name: research
 django_project_base_folder_path: "/opt/django/{{ django_project_name }}"
 django_project_folder_path: "{{ django_project_base_folder_path }}/{{ django_project_name }}"
+django_install_version: "3.2"
+django_install_version_filter: "<4.0"
 
 # django package installer
 django_pip_executable: "{{ anaconda_pip_executable }}"
