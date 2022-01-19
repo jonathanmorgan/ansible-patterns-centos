@@ -67,7 +67,6 @@ virtualenv_project_folder: "{{ work_folder }}/vew-projects"
 # installation type
 #mod_wsgi_install_type_source: "source"
 #mod_wsgi_install_type_pip: "pip"
-#mod_wsgi_install_type_conda: "conda"
 #mod_wsgi_install_type: "{{ mod_wsgi_install_type_source }}"
 
 #=========================================================#

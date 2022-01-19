@@ -25,7 +25,8 @@
   when:
     - mod_wsgi_install_type == mod_wsgi_install_type_pip
 
-- name: Install mod_wsgi using conda.
-  include: install_with_conda.yml
-  when:
-    - mod_wsgi_install_type == mod_wsgi_install_type_conda
+# BROKEN - do not install with conda.
+#- name: Install mod_wsgi using conda.
+#  include: install_with_conda.yml
+#  when:
+#    - mod_wsgi_install_type == mod_wsgi_install_type_conda

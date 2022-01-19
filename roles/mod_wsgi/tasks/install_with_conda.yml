@@ -12,8 +12,8 @@
 # install mod_wsgi package in base python environment using conda.
 - name: install mod_wsgi in base anaconda python environment ( {{ python_home_path }} ) using conda.
   shell: source {{ python_bin_folder_path }}/activate && conda install -c conda-forge mod_wsgi --yes
-  #become_user: root
-  #become_method: sudo
+  become: yes
+  become_user: root
   when:
     - mod_wsgi_install_type == mod_wsgi_install_type_conda
     - not mod_wsgi_install_conda_env_path
