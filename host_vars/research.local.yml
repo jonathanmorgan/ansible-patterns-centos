@@ -43,8 +43,29 @@ virtualenv_parent_folder: "{{ ansible_user_home_folder }}"
 virtualenv_folder: "{{ virtualenv_parent_folder }}/.virtualenvs"
 virtualenv_project_folder: "{{ work_folder }}/vew-projects"
 
-# miniconda configuration
+#=========================================================#
+# miniconda3 configuration - defaults in:
+#     - roles/miniconda3/defaults/main.yml
+#=========================================================#
+
+# python
+#do_miniconda3: true
+#do_miniconda3_links: true 
+
+# latest miniconda
+#miniconda_script: Miniconda3-latest-Linux-x86_64.sh
 #miniconda_python_version: "3.9"
+
+# try 3.6...
+# - you can get file names for other versions from: https://repo.anaconda.com/miniconda/
+# - figured out which had 3.6 from: https://stackoverflow.com/questions/54628161/which-version-of-miniconda-has-python-3-6-for-windows-64-bit
+#miniconda_script: Miniconda3-4.5.4-Linux-x86_64.sh
+#miniconda_python_version: "3.6"
+
+# URL and install details
+#miniconda_url: https://repo.anaconda.com/miniconda/{{ miniconda_script }}
+#miniconda_install_folder: /opt/miniconda3
+#miniconda_lib_link_folder: /opt/lib
 
 #=========================================================#
 # mod_wsgi configuration - defaults in:
