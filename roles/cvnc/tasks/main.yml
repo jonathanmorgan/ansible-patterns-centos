@@ -53,7 +53,7 @@
 #------------------------------------------------------------------------------#
 
 - name: git repo cloning
-  include: git.yml
+  import_tasks: git.yml
   when: do_git == true
 
 #------------------------------------------------------------------------------#
@@ -67,7 +67,7 @@
 #     - do_db: true
 
 - name: database setup include
-  include: database.yml
+  import_tasks: database.yml
   when: do_db == true
 
 #------------------------------------------------------------------------------#
@@ -75,7 +75,7 @@
 #------------------------------------------------------------------------------#
 
 - name: python setup include
-  include: python.yml
+  import_tasks: python.yml
   when: do_python == true
 
 #------------------------------------------------------------------------------#
@@ -83,6 +83,5 @@
 #------------------------------------------------------------------------------#
 
 - name: post-install coldfusion tasks.
-  include: coldfusion.yml
+  import_tasks: coldfusion.yml
   when: do_coldfusion == true
-  

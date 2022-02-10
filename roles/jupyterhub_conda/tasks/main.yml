@@ -111,7 +111,7 @@
 #------------------------------------------------------------------------------#
 # SSL certificates
 
-- include: ssl.yml
+- import_tasks: ssl.yml
 
 #------------------------------------------------------------------------------#
 
@@ -119,11 +119,11 @@
 # Spawners
 
 - name: configure systemd spawner
-  include: systemdspawner.yml
+  import_tasks: systemdspawner.yml
   when: jupyterhub_spawner == "systemdspawner"
 
 - name: configure sudospawner
-  include: sudospawner.yml
+  import_tasks: sudospawner.yml
   when: jupyterhub_spawner == "sudospawner"
 
 #------------------------------------------------------------------------------#
@@ -134,7 +134,7 @@
 #     raise child_exception_type( errno_num, err_msg, err_filename )
 # "FileNotFoundError: [Errno 2] No such file or directory: 'configurable-http-proxy': 'configurable-http-proxy'"
 # It is likely that the proxy executable is not on systemd's PATH.
-# Try making a link to the file  /usr/local/bin/configurable-http-proxy in /usr/bin: 
+# Try making a link to the file  /usr/local/bin/configurable-http-proxy in /usr/bin:
 #     sudo ln -s /usr/local/bin/configurable-http-proxy /usr/bin/configurable-http-proxy
 # If this fixes it, you should remove that symbolic link and specify the path in your jupyter_config.py:
 # "You can also set an absolute path in jupyterhub_config.py: `c.ConfigurableHTTPProxy.command = '/usr/local/bin/configurable-http-proxy'`, but there's a very good chance that there could be other PATH-related issues as well."
@@ -152,7 +152,7 @@
 #------------------------------------------------------------------------------#
 # systemd service
 
-- include: systemd_service.yml
+- import_tasks: systemd_service.yml
 
 #------------------------------------------------------------------------------#
 
@@ -203,7 +203,7 @@
 #  become_user: root
 #  apt:
 #    name:
-#     - build-essential 
+#     - build-essential
 #     - nodejs
 #     - libzmq3-dev
 #    state: present

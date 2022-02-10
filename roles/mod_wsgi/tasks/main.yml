@@ -2,10 +2,9 @@
 # ==> what action?
 
 - name: Remove existing mod_wsgi
-  include: clean.yml
+  import_tasks: clean.yml
   when: mod_wsgi_action == "clean"
 
 - name: Install mod_wsgi (including clean)
-  include: install.yml
+  import_tasks: install.yml
   when: mod_wsgi_action == "install"
-

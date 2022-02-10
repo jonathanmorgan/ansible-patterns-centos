@@ -102,17 +102,17 @@
 # ==> install python environment.
 
 - name: Install conda environment
-  include: install_conda_env.yml
+  import_tasks: install_conda_env.yml
   when:
     - django_python_env_type == python_env_type_conda
 
 - name: Install virtualenv
-  include: install_virtualenv.yml
+  import_tasks: install_virtualenv.yml
   when:
     - django_python_env_type == python_env_type_virtualenv
 
 #- name: Install venv
-#  include: install_venv.yml
+#  import_tasks: install_venv.yml
 #  when: django_python_env_type == python_env_type_venv
 
 #------------------------------------------------------------------------------#
@@ -192,17 +192,17 @@
 # ==> set up database.
 
 - name: Setup PostgreSQL database.
-  include: database_setup_postgresql.yml
+  import_tasks: database_setup_postgresql.yml
   when:
     - django_database_type == "postgresql"
 
 - name: Setup MySQL database.
-  include: database_setup_mysql.yml
+  import_tasks: database_setup_mysql.yml
   when:
     - django_database_type == "mysql"
 
 - name: Setup SQLite database.
-  include: database_setup_sqlite3.yml
+  import_tasks: database_setup_sqlite3.yml
   when:
     - django_database_type == "sqlite3"
 
@@ -282,6 +282,6 @@
 
 #===============================================================================
 # ==> configure the django web app.
-- include: configure_web_app.yml
+- import_tasks: configure_web_app.yml
   when:
     - django_configure_apache == true
