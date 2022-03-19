@@ -10,23 +10,23 @@
 #------------------------------------------------------------------------------#
 # first, archive old install
 - name: clean up old install of mod_wsgi
-  include: clean.yml
+  import_tasks: clean.yml
 
 #==============================================================================#
 # ==> install mod_wsgi...
 
 - name: Install mod_wsgi from source.
-  include: install_from_source.yml
+  import_tasks: install_from_source.yml
   when:
     - mod_wsgi_install_type == mod_wsgi_install_type_source
 
 - name: Install mod_wsgi using pip.
-  include: install_with_pip.yml
+  import_tasks: install_with_pip.yml
   when:
     - mod_wsgi_install_type == mod_wsgi_install_type_pip
 
 # BROKEN - do not install with conda.
 #- name: Install mod_wsgi using conda.
-#  include: install_with_conda.yml
+#  import_tasks: install_with_conda.yml
 #  when:
 #    - mod_wsgi_install_type == mod_wsgi_install_type_conda

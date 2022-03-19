@@ -1,2 +1,2 @@
 ---
-- include: install_httpd.yml
+- import_tasks: install_httpd.yml
