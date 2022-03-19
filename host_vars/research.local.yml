@@ -25,6 +25,8 @@ pip_executable: "{{ python_3_pip_executable }}"
 server_host_name: research
 server_name: "{{ server_host_name }}.local"
 server_ip_address: 172.16.111.134
+server_type: "rhel" # or "centos"
+server_rhel_version: "8"
 server_centos_version: "8"
 # if CentOS 8, use dnf. If CentOS 7, use yum.
 server_centos_package_manager: "dnf" # "yum" or "dnf"

@@ -38,7 +38,7 @@
       - sqlite-devel
       - vim
       - expect
-      - libsemanage-python
+      - policycoreutils-python-utils
     state: present
   when: server_centos_package_manager == "dnf"
 
@@ -59,7 +59,7 @@
       - sqlite
       - sqlite-devel
       - vim
-      - libsemanage-python
+      - policycoreutils-python
     state: present
   when: server_centos_package_manager == "yum"
 
@@ -79,9 +79,11 @@
 # ==> pip
 
 # download install script
-- name: Download get-pip.py
+#url: https://bootstrap.pypa.io/get-pip.py
+# ERROR: This script does not work on Python 3.6 The minimum supported Python version is 3.7. Please use https://bootstrap.pypa.io/pip/3.6/get-pip.py instead.
+- name: Download python 3.6 get-pip.py
   get_url:
-    url: https://bootstrap.pypa.io/get-pip.py
+    url: https://bootstrap.pypa.io/pip/3.6/get-pip.py
     dest: ~/Downloads/get-pip.py
 
 # install pip in python 3

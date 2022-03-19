@@ -23,15 +23,49 @@
 
 # ==> package installation
 
-# Make sure EPEL is installed.
-- name: Ensure EPEL repository is enabled (dnf)
+# Make sure EPEL is installed
+- name: Enable codeready-builder repo - RHEL8
+  become: yes
+  become_user: root
+  shell: "subscription-manager repos --enable codeready-builder-for-rhel-8-$(arch)-rpms"
+  when:
+    - server_centos_package_manager == "dnf"
+    - server_type == "rhel"
+    - server_rhel_version == "8"
+
+- name: Install EPEL GPG key - RHEL8
+  become: yes
+  become_user: root
+  rpm_key:
+    state: present
+    key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+  when:
+    - server_centos_package_manager == "dnf"
+    - server_type == "rhel"
+    - server_rhel_version == "8"
+
+- name: Ensure EPEL repository is enabled (dnf) - RHEL8
+  become: yes
+  become_user: root
+  dnf: 
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    state: present
+    update_cache: yes
+  when:
+    - server_centos_package_manager == "dnf"
+    - server_type == "rhel"
+    - server_rhel_version == "8"
+
+- name: Ensure EPEL repository is enabled (dnf) - CentOS
   become: yes
   become_user: root
   dnf: 
     name: epel-release 
     state: present
     update_cache: yes
-  when: server_centos_package_manager == "dnf"
+  when:
+    - server_centos_package_manager == "dnf"
+    - server_type != "rhel"
 
 - name: dnf-clean-metadata
   become: yes
@@ -48,7 +82,9 @@
     name: epel-release 
     state: present
     update_cache: yes
-  when: server_centos_package_manager == "yum"
+  when:
+    - server_centos_package_manager == "yum"
+    - server_type != "rhel"
 
 - name: yum-clean-metadata
   become: yes

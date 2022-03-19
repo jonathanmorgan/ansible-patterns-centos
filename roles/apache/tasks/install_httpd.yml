@@ -9,6 +9,7 @@
     name:
       - httpd
       - httpd-devel
+#      - mod_proxy_uwsgi
   notify: restart httpd
   when: server_centos_package_manager == "dnf"
 
@@ -19,6 +20,7 @@
     name:
       - httpd
       - httpd-devel
+#      - mod_proxy_uwsgi
   notify: restart httpd
   when: server_centos_package_manager == "yum"
 
