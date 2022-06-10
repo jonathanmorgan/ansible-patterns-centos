@@ -224,6 +224,10 @@ django_superuser_username: "{{ ansible_user }}"
 django_superuser_password: "{{ ansible_become_password }}"
 django_superuser_email: ""
 
+# create database things?
+#django_db_create_db_user: false
+#django_db_create_database: false
+
 # ==> django setup control variables
 #django_setup_folders: true
 #django_install_os_packages: true

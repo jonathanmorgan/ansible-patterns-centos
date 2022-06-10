@@ -103,6 +103,10 @@ django_db_username: "django_user"
 django_db_password: "{{ ansible_become_password }}"
 django_db_host: "localhost"
 
+# create database things?
+django_db_create_db_user: false
+django_db_create_database: false
+
 # django project database configuration - sqlite3
 #django_database_type: "sqlite3"  # for now, supported: "mysql", "postgresql", "sqlite3"
 #django_db_python_package: ""
