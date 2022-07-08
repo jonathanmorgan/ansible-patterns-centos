@@ -6,7 +6,7 @@
   become: yes
   become_user: root
   file:
-    path: "{{jupyterhub_config_folder}}"
+    path: "{{ jupyterhub_config_folder }}"
     state: directory
 
 # see if there is a conda environment for jupyterhub.
@@ -28,6 +28,9 @@
     - conda_env_exists_check.rc == 1
     - conda_env_exists_check.stdout == ""
 
+#------------------------------------------------------------------------------#
+# ==> install jupyterhub and related packages
+
 # Install jupyterhub
 - name: Install jupyterhub in conda environment
   become: yes
@@ -41,20 +44,30 @@
   shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install -c conda-forge jupyterhub-systemdspawner sudospawner jupyter_contrib_nbextensions jupyter_nbextensions_configurator importlib_resources --yes
 
 #------------------------------------------------------------------------------#
-# ==> configuration
+# ==> install node and configurable-http-proxy
 
-# create jupyterhub config folder (defauts to /etc/jupyterhub)
-- name: create jupyterhub config folder
+# Install nodejs in conda environment.
+- name: Install nodejs in conda environment
   become: yes
   become_user: root
-  file:
-    path: "{{jupyterhub_config_folder}}"
-    state: directory
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install nodejs --yes
 
-# check if configuration file already there.
+# install configurable-http-proxy using npm.
+# - this will install it and its dependencies in `{{ jupyterhub_home_folder }}/node_modules/`.
+- name: install configurable-http-proxy using npm
+  become: yes
+  become_user: root
+  shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && conda install configurable-http-proxy --yes
+  args:
+    chdir: "{{ jupyterhub_home_folder }}"
+
+#------------------------------------------------------------------------------#
+# ==> configuration
+
+# check if configuration file already in config folder.
 - name: check if jupyterhub_config.py exists
   stat:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_config.py'
   register: jupyterhub_config
 
 # initialize jupyterhub configuration if not already there.
@@ -63,13 +76,13 @@
   become_user: root
   shell: source {{ anaconda_bin_path }}/activate {{ jupyterhub_conda_env }} && jupyterhub --generate-config
   args:
-    chdir: "{{jupyterhub_config_folder}}"
+    chdir: "{{ jupyterhub_config_folder }}"
   when: jupyterhub_config.stat.exists == False
 
 # check if environment file already there.
 - name: check if jupyterhub_environment exists
   stat:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_environment'
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_environment'
   register: jupyterhub_environment
 
 # Create jupyterhub_environment if not already there.
@@ -86,17 +99,26 @@
   become: yes
   become_user: root
   lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.ConfigurableHTTPProxy.auth_token = '{{jupyterhub_configproxy_auth_token}}'"
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_config.py'
+    line: "c.ConfigurableHTTPProxy.auth_token = '{{ jupyterhub_configproxy_auth_token }}'"
   when: jupyterhub_configproxy_auth_token != ""
+
+# add path to conda-installed configurable-http-proxy executable.
+# - should be '{{ jupyterhub_home_folder }}/node_modules/.bin/configurable-http-proxy'
+- name: add path to conda-installed configurable-http-proxy ( {{ jupyterhub_home_folder }}/node_modules/.bin/configurable-http-proxy ).
+  become: yes
+  become_user: root
+  lineinfile:
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_config.py'
+    line: "c.ConfigurableHTTPProxy.command = '{{ jupyterhub_home_folder }}/node_modules/.bin/configurable-http-proxy'"
 
 # add admin_users
 - name: Add admin_users.
   become: yes
   become_user: root
   lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.Authenticator.admin_users = [ {{jupyterhub_admin_user_list}} ]"
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_config.py'
+    line: "c.Authenticator.admin_users = [ {{ jupyterhub_admin_user_list }} ]"
   when: jupyterhub_admin_user_list != ""
 
 # add white list if one specified.
@@ -104,8 +126,8 @@
   become: yes
   become_user: root
   lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
-    line: "c.Authenticator.whitelist = [ {{jupyterhub_whitelist_list}} ]"
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_config.py'
+    line: "c.Authenticator.whitelist = [ {{ jupyterhub_whitelist_list }} ]"
   when: jupyterhub_whitelist_list != ""
 
 #------------------------------------------------------------------------------#
@@ -128,6 +150,9 @@
 
 #------------------------------------------------------------------------------#
 
+# NOTE: this should be addressed by installing configurable-http-proxy using
+#     conda, and then setting this path to that conda-installed executable,
+#     as is done above.
 # FileNotFoundError: [Errno 2] No such file or directory: 'configurable-http-proxy': 'configurable-http-proxy'
 # If you run jupyterhub on startup with systemd, and it won't start, and you encounter the following error when you run "sudo service jupyterhub status":
 #   File "/usr/lib/python3.6/subprocess.py", line 1344, in _execute_child
@@ -145,7 +170,7 @@
   become: yes
   become_user: root
   lineinfile:
-    path: '{{jupyterhub_config_folder}}/jupyterhub_config.py'
+    path: '{{ jupyterhub_config_folder }}/jupyterhub_config.py'
     line: "#c.ConfigurableHTTPProxy.command = '{{jupyterhub_proxy_command_path}}'"
   when: jupyterhub_proxy_command_path != ""
 
