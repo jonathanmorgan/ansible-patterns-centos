@@ -131,6 +131,10 @@ django_settings_import: "{{ django_project_name }}.settings"
 #     you might need to adjust the permissions.
 #django_project_folder_mode: 0777
 
+# django security setup
+# generate random secret key: openssl rand -base64 64
+django_secret_key: "changemeplease"
+
 # django user setup.
 django_superuser_username: "{{ ansible_user }}"
 django_superuser_password: "{{ ansible_become_password }}"

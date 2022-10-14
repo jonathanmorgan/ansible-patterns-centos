@@ -52,7 +52,7 @@ virtualenv_project_folder: "{{ work_folder }}/vew-projects"
 
 # python
 #do_miniconda3: true
-#do_miniconda3_links: true 
+#do_miniconda3_links: true
 
 # latest miniconda
 #miniconda_script: Miniconda3-latest-Linux-x86_64.sh
@@ -223,6 +223,10 @@ django_db_port: "5432"
 django_superuser_username: "{{ ansible_user }}"
 django_superuser_password: "{{ ansible_become_password }}"
 django_superuser_email: ""
+
+# django security setup
+# generate random secret key: openssl rand -base64 64
+#django_secret_key: "changemeplease"
 
 # create database things?
 #django_db_create_db_user: false
